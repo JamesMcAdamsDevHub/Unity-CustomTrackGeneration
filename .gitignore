@@ -1,0 +1,63 @@
+# This .gitignore file should be placed at the root of your Unity project directory.
+#
+# Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
+
+# Directories and files to ignore
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Visual Studio files
+.vs/
+.suo
+.user
+.userprefs
+
+# Unity-specific files
+*.unityproj
+*.jmp
+*.booproj
+*.pidb
+*.smproj
+*.swcache
+*.opensdf
+*.VC.db
+*.sdf
+*.mtl
+
+# Asset and Project Settings exclusions (optional, use with caution)
+# ProjectSettings.asset # Generally, you want to include this file.
+# *.asset # Use with caution
+
+# Uncomment this line if you wish to ignore the asset store tools plugin
+# Assets/AssetStoreTools*
+
+# Uncomment this line if you wish to ignore Audio related data
+# Assets/Wwise/
+
+# macOS files
+.DS_Store
+# Temporary files or directories created by older macOS versions
+.AppleDouble
+.LSOverride
+
+# Linux files
+# Memory snapshot files (may contain sensitive information)
+*.psns
+
+# Windows files
+# Compiled Output files
+*.exe
+*.dll
+*.pdb
+*.bytes
+
+# Misc
+# Cache file for the Wwise project data
+# AkWwiseProjectData.asset 

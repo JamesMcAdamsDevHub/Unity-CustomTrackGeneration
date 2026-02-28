@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17adc42a7e4fcef4484a482d1f426930, type: 3}
+  m_Name: TrackGenerationDefaultConfig
+  m_EditorClassIdentifier: Assembly-CSharp::TrackGenerationDefaultConfig
+  TrackWidth: 150
+  TrackHeight: 5
+  RailWidth: 1
+  RailRidgeHeight: 5
+  RailRidgePosition: 0.7
+  DistanceBetweenRings: 20
+  DeckMaterial: {fileID: 2100000, guid: 2a2d1a2017eb8fd4aba3ffbf3b40df7f, type: 2}
+  RailMaterial: {fileID: 2100000, guid: 6e04036147caec142af2db63eed77810, type: 2}
+  BaseMaterial: {fileID: 2100000, guid: 9838e17712bbcf54ba439b0517ec08fd, type: 2}
