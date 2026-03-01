@@ -31,8 +31,8 @@ public class TrackAlongSplineGenerator : MonoBehaviour
     [Header("Spline Container")]
     [SerializeField] private SplineContainer _splineContainer;
 
-    private TrackConstraintsData trackConstraintsData = new TrackConstraintsData();
-    private List<GameObject> generatedGameObjects = new List<GameObject>();
+    private TrackConstraintsData _trackConstraintsData = new TrackConstraintsData();
+    private List<GameObject> _generatedGameObjects = new List<GameObject>();
 
     private void OnValidate() 
     {
@@ -74,12 +74,12 @@ public class TrackAlongSplineGenerator : MonoBehaviour
     }
     private void UpdateTrackConstraintsData()
     {
-        trackConstraintsData.TrackWidth = _trackWidth;
-        trackConstraintsData.TrackHeight = _trackHeight;
-        trackConstraintsData.RailRidgePosition = _railRidgePosition;
-        trackConstraintsData.DistanceBetweenRings = _distanceBetweenRings;
-        trackConstraintsData.RailWidth = _railWidth;
-        trackConstraintsData.RailRidgeHeight = _railRidgeHeight;
+        _trackConstraintsData.TrackWidth = _trackWidth;
+        _trackConstraintsData.TrackHeight = _trackHeight;
+        _trackConstraintsData.RailRidgePosition = _railRidgePosition;
+        _trackConstraintsData.DistanceBetweenRings = _distanceBetweenRings;
+        _trackConstraintsData.RailWidth = _railWidth;
+        _trackConstraintsData.RailRidgeHeight = _railRidgeHeight;
     }
 
     private void UpdateLocalFieldsFromConfig()
@@ -122,21 +122,36 @@ public class TrackAlongSplineGenerator : MonoBehaviour
 
     private void DestroyPreviousTrack()
     {
-        foreach (GameObject go in generatedGameObjects)
+        foreach (GameObject go in _generatedGameObjects)
         {
             if (go != null) 
                 DestroyImmediate(go);
         }
-        generatedGameObjects.Clear();
+        _generatedGameObjects.Clear();
     }
 
     private void GenerateEndcaps() 
     {
-        // TODO: Complete Function
+        /*  
+         *  TODO: If provided fields dictate start and/or end endcaps should be created:
+         *      Create instance of TrackEndcapData
+         *      Call GenerateEndcapAtPoint on TrackEndcapData using start or end of spline Transform respectively
+         *      Create insatnce of TrackEndcap
+         *      Call Generate on TrackEndcap and store it's returned GameObject in generatedGameObjects
+        */
     }
 
     private void GenerateTrackAlongSpline() 
     {
-        // TODO: Complete Function
+        /*  
+         *  TODO: Determine # of track segments that must be created to
+         *  assure no track segment contains more than 6000 vertices.
+         *  Determine length of each segment, cutting last segment short if necessary to complete the generation.
+         *  For each track segment:
+         *      Create instance of TrackRingsData
+         *      Call GenerateRingAtPoint on TrackRingsData using Transform data from spline point at interval
+         *      Create insatnce of TrackSegment
+         *      Calling Generate on TrackSegment and store it's returned GameObject in generatedGameObjects
+        */
     }
 }
