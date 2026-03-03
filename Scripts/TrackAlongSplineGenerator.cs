@@ -1,6 +1,11 @@
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class TrackAlongSplineGenerator : MonoBehaviour
 {
@@ -34,6 +39,7 @@ public class TrackAlongSplineGenerator : MonoBehaviour
     private TrackConstraintsData _trackConstraintsData = new TrackConstraintsData();
     private List<GameObject> _generatedGameObjects = new List<GameObject>();
 
+#if UNITY_EDITOR
     private void OnValidate() 
     {
         if (_useConfig)
@@ -53,12 +59,19 @@ public class TrackAlongSplineGenerator : MonoBehaviour
 
         if (GenerateTrack)
         {
-            UpdateTrackConstraintsData();
-            GenerateNewTrack();
             GenerateTrack = false;
+
+            EditorApplication.delayCall += () =>
+            {
+                if (this == null) return;
+
+                UpdateTrackConstraintsData();
+                GenerateNewTrack();
+            };
+            
         }
     }
-
+#endif
     private void EnforceLocalFieldConstraints()
     {
         _trackWidth = Mathf.Clamp(_trackWidth, 10f, 300f);
@@ -84,12 +97,13 @@ public class TrackAlongSplineGenerator : MonoBehaviour
 
     private void UpdateLocalFieldsFromConfig()
     {
+        // Dev Note: _trackConfig applies all constraints
         _trackWidth = _trackConfig.TrackWidth;
         _trackHeight = _trackConfig.TrackHeight;
         _railRidgePosition = _trackConfig.RailRidgePosition;
         _distanceBetweenRings = _trackConfig.DistanceBetweenRings;
-        _railWidth = _trackConfig.RailWidth; // Dev Note: _trackConfig applies RailWidth constraints
-        _railRidgeHeight = _trackConfig.RailRidgeHeight; // Dev Note: _trackConfig applies RailRidgeHeight constraints
+        _railWidth = _trackConfig.RailWidth; 
+        _railRidgeHeight = _trackConfig.RailRidgeHeight; 
 
         if (_trackConfig.DeckMaterial == null || _trackConfig.RailMaterial == null || _trackConfig.BaseMaterial == null)
         {
@@ -132,13 +146,41 @@ public class TrackAlongSplineGenerator : MonoBehaviour
 
     private void GenerateEndcaps() 
     {
-        /*  
-         *  TODO: If provided fields dictate start and/or end endcaps should be created:
-         *      Create instance of TrackEndcapData
-         *      Call GenerateEndcapAtPoint on TrackEndcapData using start or end of spline Transform respectively
-         *      Create insatnce of TrackEndcap
-         *      Call Generate on TrackEndcap and store it's returned GameObject in generatedGameObjects
-        */
+        if (_generateStartEndcap)
+        {
+            GenerateSpecifiedEndcap(true);
+        }
+
+        if (_generateEndEndcap)
+        {
+            GenerateSpecifiedEndcap(false);
+        }
+    }
+
+    private void GenerateSpecifiedEndcap(bool isStartEndcap)
+    {
+        float3 posTemp, tanTemp, upTemp;
+        float t = isStartEndcap ? 0f : 1f;
+        _splineContainer.Evaluate(t, out posTemp, out tanTemp, out upTemp);
+
+        Vector3 worldPosition = (Vector3)posTemp;
+
+        Vector3 forward = ((Vector3)tanTemp).normalized;
+        Vector3 up = ((Vector3)upTemp).normalized;
+
+        if (!isStartEndcap) forward *= -1f;
+
+        Quaternion worldRotation = Quaternion.LookRotation(forward, up);
+
+        TrackEndcapData endcapData = new TrackEndcapData(_trackConstraintsData);
+        endcapData.GenerateEndcapData();
+
+        TrackEndcap endcap = new TrackEndcap(_railMaterial, _baseMaterial, endcapData.railMeshData, endcapData.baseMeshData);
+
+        GameObject endcapGO = endcap.Generate(worldPosition, worldRotation);
+        endcapGO.transform.SetParent(transform, true);
+
+        _generatedGameObjects.Add(endcapGO);
     }
 
     private void GenerateTrackAlongSpline() 

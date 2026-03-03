@@ -3,9 +3,9 @@ using UnityEngine;
 public class TrackRingsData
 {
     private TrackConstraintsData _trackConstraintsData;
-    public MeshData deckMeshData;
-    public MeshData railMeshData;
-    public MeshData baseMeshData;
+    public MeshData deckMeshData = new MeshData();
+    public MeshData railMeshData = new MeshData();
+    public MeshData baseMeshData = new MeshData();
 
     public TrackRingsData(TrackConstraintsData trackConstraintsData)
     {
