@@ -18,11 +18,11 @@ public class TrackEndcap
         this._baseMeshData = baseMeshData;
     }
 
-    public GameObject Generate(Vector3 worldPosition, Quaternion worldRotation)
+    public GameObject Generate(Vector3 localPosition, Quaternion localRotation)
     {
         GameObject endcapObject;
         endcapObject = new GameObject("Endcap");
-        endcapObject.transform.SetPositionAndRotation(worldPosition, worldRotation);
+        endcapObject.transform.SetPositionAndRotation(localPosition, localRotation);
         endcapObject.transform.localScale = Vector3.one;
 
         GameObject railObject;

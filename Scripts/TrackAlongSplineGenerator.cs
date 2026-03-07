@@ -40,7 +40,7 @@ public class TrackAlongSplineGenerator : MonoBehaviour
     private List<GameObject> _generatedGameObjects = new List<GameObject>();
 
 #if UNITY_EDITOR
-    private void OnValidate() 
+    private void OnValidate()
     {
         if (_useConfig)
         {
@@ -68,7 +68,7 @@ public class TrackAlongSplineGenerator : MonoBehaviour
                 UpdateTrackConstraintsData();
                 GenerateNewTrack();
             };
-            
+
         }
     }
 #endif
@@ -102,15 +102,15 @@ public class TrackAlongSplineGenerator : MonoBehaviour
         _trackHeight = _trackConfig.TrackHeight;
         _railRidgePosition = _trackConfig.RailRidgePosition;
         _distanceBetweenRings = _trackConfig.DistanceBetweenRings;
-        _railWidth = _trackConfig.RailWidth; 
-        _railRidgeHeight = _trackConfig.RailRidgeHeight; 
+        _railWidth = _trackConfig.RailWidth;
+        _railRidgeHeight = _trackConfig.RailRidgeHeight;
 
         if (_trackConfig.DeckMaterial == null || _trackConfig.RailMaterial == null || _trackConfig.BaseMaterial == null)
         {
             Debug.LogWarning("Could not assign materials from _trackConfig: _trackConfig material(s) are not assigned.", this);
             return;
         }
-        
+
         _deckMaterial = _trackConfig.DeckMaterial;
         _railMaterial = _trackConfig.RailMaterial;
         _baseMaterial = _trackConfig.BaseMaterial;
@@ -138,13 +138,13 @@ public class TrackAlongSplineGenerator : MonoBehaviour
     {
         foreach (GameObject go in _generatedGameObjects)
         {
-            if (go != null) 
+            if (go != null)
                 DestroyImmediate(go);
         }
         _generatedGameObjects.Clear();
     }
 
-    private void GenerateEndcaps() 
+    private void GenerateEndcaps()
     {
         if (_generateStartEndcap)
         {
@@ -163,37 +163,94 @@ public class TrackAlongSplineGenerator : MonoBehaviour
         float t = isStartEndcap ? 0f : 1f;
         _splineContainer.Evaluate(t, out posTemp, out tanTemp, out upTemp);
 
-        Vector3 worldPosition = (Vector3)posTemp;
+        Vector3 localPosition = (Vector3)posTemp;
+        Vector3 localForward = ((Vector3)tanTemp).normalized;
+        Vector3 localUp = ((Vector3)upTemp).normalized;
 
-        Vector3 forward = ((Vector3)tanTemp).normalized;
-        Vector3 up = ((Vector3)upTemp).normalized;
+        if (!isStartEndcap) localForward *= -1f;
 
-        if (!isStartEndcap) forward *= -1f;
-
-        Quaternion worldRotation = Quaternion.LookRotation(forward, up);
+        Quaternion localRotation = Quaternion.LookRotation(localForward, localUp);
 
         TrackEndcapData endcapData = new TrackEndcapData(_trackConstraintsData);
         endcapData.GenerateEndcapData();
 
         TrackEndcap endcap = new TrackEndcap(_railMaterial, _baseMaterial, endcapData.railMeshData, endcapData.baseMeshData);
 
-        GameObject endcapGO = endcap.Generate(worldPosition, worldRotation);
+        GameObject endcapGO = endcap.Generate(localPosition, localRotation);
         endcapGO.transform.SetParent(transform, true);
 
         _generatedGameObjects.Add(endcapGO);
     }
 
-    private void GenerateTrackAlongSpline() 
+    private void GenerateTrackAlongSpline()
     {
-        /*  
-         *  TODO: Determine # of track segments that must be created to
-         *  assure no track segment contains more than 6000 vertices.
-         *  Determine length of each segment, cutting last segment short if necessary to complete the generation.
-         *  For each track segment:
-         *      Create instance of TrackRingsData
-         *      Call GenerateRingAtPoint on TrackRingsData using Transform data from spline point at interval
-         *      Create insatnce of TrackSegment
-         *      Calling Generate on TrackSegment and store it's returned GameObject in generatedGameObjects
-        */
+        const int MAX_VERTS_PER_TRACK = 6000;
+        const int VERTS_PER_RING = 20;
+        const int RINGS_PER_TRACK = MAX_VERTS_PER_TRACK / VERTS_PER_RING;
+        float maxTrackLength = (float)RINGS_PER_TRACK * _distanceBetweenRings;
+        float splineLength = _splineContainer.Spline.GetLength();
+        int numTracks = (int)(splineLength / maxTrackLength) + 1;
+        float splineDistancePerTrack = 1f / numTracks;
+        float t = 0f;
+        float3 posTemp, tanTemp, upTemp;
+        Vector3 localPosition = Vector3.zero;
+        Vector3 localForward = Vector3.forward;
+        Vector3 localUp = Vector3.up;
+        float nextMaxPosAlongSpline = 0;
+
+        // Generate all track segments
+        for (int i = 1; i <= numTracks; i++)
+        {
+            TrackRingsData trackRingsData = new TrackRingsData(_trackConstraintsData);
+            nextMaxPosAlongSpline += splineDistancePerTrack;
+            if (i == numTracks) nextMaxPosAlongSpline = 1f;
+            float distanceFromLastRing = 0;
+            while (t <= nextMaxPosAlongSpline)
+            {
+                // Get local values at t along spline
+                _splineContainer.Evaluate(t, out posTemp, out tanTemp, out upTemp);
+                localPosition = (Vector3)posTemp;
+                localForward = ((Vector3)tanTemp).normalized;
+                localUp = ((Vector3)upTemp).normalized;
+
+                // Generate MeshData in trackRingsData at t
+                trackRingsData.GenerateRingAtPoint(localPosition, localForward, localUp, distanceFromLastRing);
+
+                if (t >= nextMaxPosAlongSpline) break;
+
+                Vector3 prevPos = _splineContainer.EvaluatePosition(t);
+                // Get next position along spline
+                t = GetNextPosAlongSpline(t, nextMaxPosAlongSpline);
+
+                Vector3 currPos = _splineContainer.EvaluatePosition(t);
+                distanceFromLastRing = Vector3.Distance(prevPos, currPos);
+            }
+
+            TrackSegment trackSegment = new TrackSegment(_deckMaterial, _railMaterial, _baseMaterial, trackRingsData.deckMeshData, trackRingsData.railMeshData, trackRingsData.baseMeshData);
+            Quaternion localRotation = Quaternion.LookRotation(localForward, localUp);
+            GameObject trackSegmentGO = trackSegment.Generate();
+            trackSegmentGO.transform.SetParent(transform, true);
+
+            _generatedGameObjects.Add(trackSegmentGO);
+        }
+    }
+
+    float GetNextPosAlongSpline(float t, float maxPosAlongSpline)
+    {
+        const float INCREMENT_VAL = 0.01f;
+        Vector3 currPos = _splineContainer.EvaluatePosition(t), nextPos;
+        float distanceToNextPos;
+        do
+        {
+            float nextT = Mathf.Min(t + INCREMENT_VAL, maxPosAlongSpline);
+            nextPos = _splineContainer.EvaluatePosition(nextT);
+            distanceToNextPos = Vector3.Distance(currPos, nextPos);
+            t = nextT;
+        }
+        while (t < maxPosAlongSpline && distanceToNextPos < _distanceBetweenRings);
+
+        if (t > maxPosAlongSpline) return maxPosAlongSpline;
+
+        return t;
     }
 }

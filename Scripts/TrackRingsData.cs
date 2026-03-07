@@ -7,13 +7,258 @@ public class TrackRingsData
     public MeshData railMeshData = new MeshData();
     public MeshData baseMeshData = new MeshData();
 
+    const float DECK_TILE_SIZE = 0.03f;
+    const float RAIL_TILE_SIZE = 0.1f;
+    const float BASE_TILE_SIZE = 0.1f;
+
+    private float _previousDeckV = 0;
+    private float _currentDeckV = 0;
+
+    private int _previousRailU = 0;
+    private int _currentRailU = 0;
+    private int _previousBaseU = 0;
+    private int _currentBaseU = 0;
+
+    private float _distanceAlongTrack = 0f;
+
     public TrackRingsData(TrackConstraintsData trackConstraintsData)
     {
-        this._trackConstraintsData = trackConstraintsData;
+        _trackConstraintsData = trackConstraintsData;
     }
 
-    public void GenerateEndcapAtPoint(Vector3 worldPosition, Vector3 forward, Vector3 up)
+    public void GenerateRingAtPoint(Vector3 localPosition, Vector3 forward, Vector3 up, float distanceFromLastRing)
     {
-        // Generate and store all MeshData for a ring with trackConstraints and Transform defined by function arguments
+        TrackRingVectorData vectorData = new TrackRingVectorData(_trackConstraintsData, forward, up);
+
+        _distanceAlongTrack += distanceFromLastRing;
+        
+        updateCurrentU();
+
+        AddDeckVerts(vectorData, localPosition);
+        AddDeckTriangles();
+        AddDeckUVs();
+
+        AddRailVerts(vectorData, localPosition);
+        AddRailTriangles();
+        AddRailUVs();
+
+        AddBaseVerts(vectorData, localPosition);
+        AddBaseTriangles();
+        AddBaseUVs();
+
+        updatePreviousU();
+    }
+
+    void updateCurrentU()
+    {
+        _currentDeckV = DECK_TILE_SIZE * _distanceAlongTrack;
+        _currentRailU = (int)Mathf.Ceil(RAIL_TILE_SIZE * _distanceAlongTrack);
+        _currentBaseU = (int)Mathf.Ceil(BASE_TILE_SIZE * _distanceAlongTrack);
+    }
+
+    void updatePreviousU()
+    {
+        _previousDeckV = _currentDeckV;
+        _previousRailU = _currentRailU;
+        _previousBaseU = _currentBaseU;
+    }
+
+    void AddDeckVerts(TrackRingVectorData vectorData, Vector3 localPosition)
+    {
+        int idx = deckMeshData.vertices.Count;
+        if (idx > 2)
+        {
+            for (int i = 2; i > 0; i--)
+            {
+                deckMeshData.vertices.Add(deckMeshData.vertices[idx - i]);
+            }
+        }
+
+        // Deck
+        deckMeshData.vertices.Add(localPosition + vectorData.TrackWidthFromCenter + vectorData.TrackHeight);
+        deckMeshData.vertices.Add(localPosition - vectorData.TrackWidthFromCenter + vectorData.TrackHeight);
+    }
+
+    void AddDeckTriangles()
+    {
+        if (deckMeshData.vertices.Count == 2) return;
+
+        int startIdx = deckMeshData.vertices.Count - 4;
+        int nextIdx = 2;
+
+        // Left outer face
+        deckMeshData.triangles.Add(startIdx); deckMeshData.triangles.Add(startIdx + nextIdx); deckMeshData.triangles.Add(startIdx + 1);
+        deckMeshData.triangles.Add(startIdx + 1); deckMeshData.triangles.Add(startIdx + nextIdx); deckMeshData.triangles.Add(startIdx + 1 + nextIdx);
+    }
+
+    void AddDeckUVs()
+    {
+        if (deckMeshData.vertices.Count == 2)
+            return;
+
+        // Previous duplicated vertices
+        deckMeshData.uvs.Add(new Vector2(0f, _previousDeckV));
+        deckMeshData.uvs.Add(new Vector2(1f, _previousDeckV));
+        
+
+        // Current ring vertices
+        deckMeshData.uvs.Add(new Vector2(0f, _currentDeckV));
+        deckMeshData.uvs.Add(new Vector2(1f, _currentDeckV));
+
+    }
+
+    void AddRailVerts(TrackRingVectorData vectorData, Vector3 localPosition)
+    {
+        int idx = railMeshData.vertices.Count;
+        if (idx > 8)
+        {
+            for (int i = 8; i > 0; i--)
+            {
+                railMeshData.vertices.Add(railMeshData.vertices[idx - i]);
+            }
+        }
+
+        // Left outer face
+        railMeshData.vertices.Add(localPosition - vectorData.RailRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+        railMeshData.vertices.Add(localPosition - vectorData.TrackWidthFromCenter + vectorData.TrackHeight);
+
+        // Left inner face
+        railMeshData.vertices.Add(localPosition - vectorData.RailWidthFromCenter + vectorData.TrackHeight);
+        railMeshData.vertices.Add(localPosition - vectorData.RailRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+
+        // Right outer face
+        railMeshData.vertices.Add(localPosition + vectorData.TrackWidthFromCenter + vectorData.TrackHeight);
+        railMeshData.vertices.Add(localPosition + vectorData.RailRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+        
+
+        // Right inner face
+        railMeshData.vertices.Add(localPosition + vectorData.RailRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+        railMeshData.vertices.Add(localPosition + vectorData.RailWidthFromCenter + vectorData.TrackHeight);
+    }
+
+    void AddRailTriangles()
+    {
+        if (railMeshData.vertices.Count == 8) return;
+
+        int startIdx = railMeshData.vertices.Count - 16;
+        int nextIdx = 8;
+
+        // Left outer face
+        railMeshData.triangles.Add(startIdx); railMeshData.triangles.Add(startIdx + nextIdx); railMeshData.triangles.Add(startIdx + 1);
+        railMeshData.triangles.Add(startIdx + 1); railMeshData.triangles.Add(startIdx + nextIdx); railMeshData.triangles.Add(startIdx + 1 + nextIdx);
+
+        // Left inner face
+        railMeshData.triangles.Add(startIdx + 3); railMeshData.triangles.Add(startIdx + 2 + nextIdx); railMeshData.triangles.Add(startIdx + 3 + nextIdx);
+        railMeshData.triangles.Add(startIdx + 2); railMeshData.triangles.Add(startIdx + 2 + nextIdx); railMeshData.triangles.Add(startIdx + 3);
+
+        // Right inner face
+        railMeshData.triangles.Add(startIdx + 4); railMeshData.triangles.Add(startIdx + 4 + nextIdx); railMeshData.triangles.Add(startIdx + 5);
+        railMeshData.triangles.Add(startIdx + 5); railMeshData.triangles.Add(startIdx + 4 + nextIdx); railMeshData.triangles.Add(startIdx + 5 + nextIdx);
+
+        // Right outer face
+        railMeshData.triangles.Add(startIdx + 6); railMeshData.triangles.Add(startIdx + 6 + nextIdx); railMeshData.triangles.Add(startIdx + 7);
+        railMeshData.triangles.Add(startIdx + 7); railMeshData.triangles.Add(startIdx + 6 + nextIdx); railMeshData.triangles.Add(startIdx + 7 + nextIdx);
+    }
+
+    void AddRailUVs()
+    {
+        if (railMeshData.vertices.Count == 8)
+            return;
+
+        // Previous Vertices //
+
+        // Left outer face
+        railMeshData.uvs.Add(new Vector2(_previousRailU, 1f)); 
+        railMeshData.uvs.Add(new Vector2(_previousRailU, 0f)); 
+
+        // Left inner face
+        railMeshData.uvs.Add(new Vector2(_previousRailU, 0f)); 
+        railMeshData.uvs.Add(new Vector2(_previousRailU, 1f)); 
+
+        // Right outer face
+        railMeshData.uvs.Add(new Vector2(_previousRailU, 0f)); 
+        railMeshData.uvs.Add(new Vector2(_previousRailU, 1f)); 
+
+        // Right inner face
+        railMeshData.uvs.Add(new Vector2(_previousRailU, 1f)); 
+        railMeshData.uvs.Add(new Vector2(_previousRailU, 0f)); 
+
+        // Current Vertices //
+
+        // Left outer face
+        railMeshData.uvs.Add(new Vector2(_currentRailU, 1f)); 
+        railMeshData.uvs.Add(new Vector2(_currentRailU, 0f)); 
+
+        // Left inner face
+        railMeshData.uvs.Add(new Vector2(_currentRailU, 0f)); 
+        railMeshData.uvs.Add(new Vector2(_currentRailU, 1f)); 
+
+        // Right outer face
+        railMeshData.uvs.Add(new Vector2(_currentRailU, 0f));
+        railMeshData.uvs.Add(new Vector2(_currentRailU, 1f)); 
+
+        // Right inner face
+        railMeshData.uvs.Add(new Vector2(_currentRailU, 1f));
+        railMeshData.uvs.Add(new Vector2(_currentRailU, 0f));
+    }
+
+    void AddBaseVerts (TrackRingVectorData vectorData, Vector3 localPosition)
+    {   
+        int idx = baseMeshData.vertices.Count;
+        if (idx > 6)
+        {
+            for (int i = 6; i > 0; i--)
+            {
+                baseMeshData.vertices.Add(baseMeshData.vertices[idx - i]);
+            }
+        }
+
+        // Left side
+        baseMeshData.vertices.Add(localPosition - vectorData.TrackWidthFromCenter + vectorData.TrackHeight);
+        baseMeshData.vertices.Add(localPosition - vectorData.TrackWidthFromCenter);
+
+        // Right side
+        baseMeshData.vertices.Add(localPosition + vectorData.TrackWidthFromCenter);
+        baseMeshData.vertices.Add(localPosition + vectorData.TrackWidthFromCenter + vectorData.TrackHeight);
+
+        // Bottom
+        baseMeshData.vertices.Add(localPosition - vectorData.TrackWidthFromCenter);
+        baseMeshData.vertices.Add(localPosition + vectorData.TrackWidthFromCenter);
+    }
+
+    void AddBaseTriangles()
+    {
+        if (baseMeshData.vertices.Count == 6) return;
+
+        int startIdx = baseMeshData.vertices.Count - 12;
+        int nextIdx = 6;
+
+        // Left side
+        baseMeshData.triangles.Add(startIdx); baseMeshData.triangles.Add(startIdx + nextIdx); baseMeshData.triangles.Add(startIdx + 1);
+        baseMeshData.triangles.Add(startIdx + 1); baseMeshData.triangles.Add(startIdx + nextIdx); baseMeshData.triangles.Add(startIdx + 1 + nextIdx);
+        
+        // Right side
+        baseMeshData.triangles.Add(startIdx + 3); baseMeshData.triangles.Add(startIdx + 2 + nextIdx); baseMeshData.triangles.Add(startIdx + 3 + nextIdx);
+        baseMeshData.triangles.Add(startIdx + 2); baseMeshData.triangles.Add(startIdx + 2 + nextIdx); baseMeshData.triangles.Add(startIdx + 3);
+
+        // Bottom
+        baseMeshData.triangles.Add(startIdx + 4); baseMeshData.triangles.Add(startIdx + 4 + nextIdx); baseMeshData.triangles.Add(startIdx + 5);
+        baseMeshData.triangles.Add(startIdx + 5); baseMeshData.triangles.Add(startIdx + 4 + nextIdx); baseMeshData.triangles.Add(startIdx + 5 + nextIdx);
+    }
+    void AddBaseUVs()
+    {
+        if (baseMeshData.vertices.Count == 6)
+            return;
+
+        for (int i = 0; i < 3; i++)
+        {
+            // Previous duplicated vertices
+            baseMeshData.uvs.Add(new Vector2(_previousBaseU, 0f));
+            baseMeshData.uvs.Add(new Vector2(_previousBaseU, 1f));
+
+            // Current ring vertices
+            baseMeshData.uvs.Add(new Vector2(_currentBaseU, 0f));
+            baseMeshData.uvs.Add(new Vector2(_currentBaseU, 1f));
+        }
     }
 }
