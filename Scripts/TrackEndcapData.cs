@@ -63,10 +63,13 @@ public class TrackEndcapData
         AddRectangularUVs(baseMeshData, _trackConstraintsData.TrackWidth);
 
         // Bottom
-        baseMeshData.vertices.Add(-trackWidthFromCenter);
         baseMeshData.vertices.Add(-trackWidthFromCenter + trackDepth);
+        baseMeshData.vertices.Add(trackWidthFromCenter + trackDepth);
+        baseMeshData.vertices.Add(-trackWidthFromCenter);
         baseMeshData.vertices.Add(trackWidthFromCenter);
-        baseMeshData.vertices.Add(trackWidthFromCenter + trackDepth);;  
+        
+        
+        
 
         AddRectangularSetOfTriangles(baseMeshData);
         AddRectangularUVs(baseMeshData, _trackConstraintsData.TrackWidth);
@@ -196,11 +199,11 @@ public class TrackEndcapData
 
     void AddRectangularUVs(MeshData meshData, float width)
     {
-        int UVWidth = (int)((width / _trackConstraintsData.RailWidth));
+        int U1 = (int)((width / _trackConstraintsData.RailWidth));
         meshData.uvs.Add(new Vector2(0, 0)); // Left-Bottom
-        meshData.uvs.Add(new Vector2(UVWidth, 0)); // Right-Bottom
+        meshData.uvs.Add(new Vector2(U1, 0)); // Right-Bottom
         meshData.uvs.Add(new Vector2(0, 1)); // Left-Top
-        meshData.uvs.Add(new Vector2(UVWidth, 1)); // Right-Top
+        meshData.uvs.Add(new Vector2(U1, 1)); // Right-Top
     }
 
     void AddRectangularSetOfTriangles(MeshData meshData)
