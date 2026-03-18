@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(TrackGenerationOrchestrator), true)]
-public class TrackGenerationOrchestratorEditor : Editor
+public class TrackGenerationInspectorButton : Editor
 {
     public override void OnInspectorGUI()
     {

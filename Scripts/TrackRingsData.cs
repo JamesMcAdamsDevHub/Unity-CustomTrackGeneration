@@ -7,16 +7,12 @@ public class TrackRingsData
     public MeshData railMeshData = new MeshData();
     public MeshData baseMeshData = new MeshData();
 
-    const float DECK_TILE_SIZE = 0.03f;
-    const float RAIL_TILE_SIZE = 0.03f;
-    const float BASE_TILE_SIZE = 0.005f;
-
-    private float _previousDeckV = 0;
-    private float _currentDeckV = 0;
-    private float _previousRailU = 0;
-    private float _currentRailU = 0;
-    private float _previousBaseU = 0;
-    private float _currentBaseU = 0;
+    private float _previousDeckV = 0f;
+    private float _currentDeckV = 0f;
+    private float _previousRailU = 0f;
+    private float _currentRailU = 0f;
+    private float _previousBaseU = 0f;
+    private float _currentBaseU = 0f;
 
     private float _distanceAlongTrack = 0f;
 
@@ -50,9 +46,9 @@ public class TrackRingsData
 
     void updateCurrentU()
     {
-        _currentDeckV = DECK_TILE_SIZE * _distanceAlongTrack;
-        _currentRailU = RAIL_TILE_SIZE * _distanceAlongTrack;
-        _currentBaseU = BASE_TILE_SIZE * _distanceAlongTrack;
+        _currentDeckV = _trackConstraintsData.DeckMaterialTileSize * _distanceAlongTrack / 40f;
+        _currentRailU = _trackConstraintsData.RailMaterialTileSize * _distanceAlongTrack / 20f;
+        _currentBaseU = _trackConstraintsData.BaseMaterialTileSize * _distanceAlongTrack / 20f;
     }
 
     void updatePreviousU()

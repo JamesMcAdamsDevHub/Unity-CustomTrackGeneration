@@ -19,8 +19,11 @@ public class TrackGenerationSettings
 
     [Header("Track Materials")]
     public Material deckMaterial;
+    [Range(0.01f, 5f)] public float deckMaterialTileSize;
     public Material railMaterial;
+    [Range(0.01f, 5f)] public float railMaterialTileSize;
     public Material baseMaterial;
+    [Range(0.01f, 5f)] public float baseMaterialTileSize;
 
     public void UpdateConstraints(Object context)
     {
@@ -54,6 +57,9 @@ public class TrackGenerationSettings
         deckMaterial = trackConfig.DeckMaterial;
         railMaterial = trackConfig.RailMaterial;
         baseMaterial = trackConfig.BaseMaterial;
+        deckMaterialTileSize = trackConfig.DeckMaterialTileSize;
+        railMaterialTileSize = trackConfig.RailMaterialTileSize;
+        baseMaterialTileSize = trackConfig.BaseMaterialTileSize;
     }
 
     public void EnforceConstraints()
@@ -64,6 +70,9 @@ public class TrackGenerationSettings
         railRidgeHeight = Mathf.Clamp(railRidgeHeight, 0f, 20f);
         railRidgePosition = Mathf.Clamp(railRidgePosition, 0f, 1f);
         distanceBetweenRings = Mathf.Clamp(distanceBetweenRings, 0.5f, 200f);
+        deckMaterialTileSize = Mathf.Clamp(deckMaterialTileSize, 0.01f, 5f);
+        railMaterialTileSize = Mathf.Clamp(railMaterialTileSize, 0.01f, 5f);
+        baseMaterialTileSize = Mathf.Clamp(baseMaterialTileSize, 0.01f, 5f);
     }
 
     public void CopyTo(TrackConstraintsData data)
@@ -74,5 +83,8 @@ public class TrackGenerationSettings
         data.RailRidgeHeight = railRidgeHeight;
         data.RailRidgePosition = railRidgePosition;
         data.DistanceBetweenRings = distanceBetweenRings;
+        data.DeckMaterialTileSize = deckMaterialTileSize;
+        data.RailMaterialTileSize = railMaterialTileSize;
+        data.BaseMaterialTileSize = baseMaterialTileSize;
     }
 }

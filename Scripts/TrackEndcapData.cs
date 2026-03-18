@@ -199,7 +199,7 @@ public class TrackEndcapData
 
     void AddRectangularUVs(MeshData meshData, float width)
     {
-        int U1 = (int)((width / _trackConstraintsData.RailWidth));
+        int U1 = (int)Mathf.Clamp(width / _trackConstraintsData.RailWidth * _trackConstraintsData.RailMaterialTileSize, 1, 10);
         meshData.uvs.Add(new Vector2(0, 0)); // Left-Bottom
         meshData.uvs.Add(new Vector2(U1, 0)); // Right-Bottom
         meshData.uvs.Add(new Vector2(0, 1)); // Left-Top

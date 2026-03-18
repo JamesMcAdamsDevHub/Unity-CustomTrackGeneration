@@ -35,8 +35,11 @@ public class TrackGenerationSettingsDrawer : PropertyDrawer
         EditorGUILayout.PropertyField(property.FindPropertyRelative("distanceBetweenRings"));
 
         EditorGUILayout.PropertyField(property.FindPropertyRelative("deckMaterial"));
+        EditorGUILayout.PropertyField(property.FindPropertyRelative("deckMaterialTileSize"));
         EditorGUILayout.PropertyField(property.FindPropertyRelative("railMaterial"));
+        EditorGUILayout.PropertyField(property.FindPropertyRelative("railMaterialTileSize"));
         EditorGUILayout.PropertyField(property.FindPropertyRelative("baseMaterial"));
+        EditorGUILayout.PropertyField(property.FindPropertyRelative("baseMaterialTileSize"));
 
         EditorGUI.EndDisabledGroup();
 

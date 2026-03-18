@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
@@ -19,9 +18,8 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
     [SerializeField] private SplineContainer _splineContainer;
 
     private TrackConstraintsData _trackConstraintsData = new TrackConstraintsData();
-    private readonly List<GameObject> _generatedGameObjects = new();
+    private const string ROOT_NAME = "Track_Root";
 
-#if UNITY_EDITOR
     private void OnValidate()
     {
         if (_settings != null)
@@ -46,8 +44,20 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         }
     }
 
+    private Transform GetOrCreateRoot()
+    {
+        Transform existing = transform.Find(ROOT_NAME);
+        if (existing != null)
+            return existing;
 
+        GameObject root = new GameObject(ROOT_NAME);
+#if UNITY_EDITOR
+        Undo.RegisterCreatedObjectUndo(root, "Create Track Root");
+        Undo.SetTransformParent(root.transform, transform, "Attach root to parent");
 #endif
+
+        return root.transform;
+    }
 
     private void GenerateNewTrack()
     {
@@ -64,13 +74,15 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
 
     private void DestroyPreviousTrack()
     {
-        foreach (GameObject go in _generatedGameObjects)
-        {
-            if (go != null)
-                DestroyImmediate(go);
-        }
-        _generatedGameObjects.Clear();
+        Transform root = transform.Find(ROOT_NAME);
+
+        if (root == null) return;
+
+#if UNITY_EDITOR
+        Undo.DestroyObjectImmediate(root.gameObject);
+#endif
     }
+
 
     private void GenerateEndcaps()
     {
@@ -96,18 +108,16 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         Vector3 localUp = ((Vector3)upTemp).normalized;
 
         if (!isStartEndcap) localForward *= -1f;
-
+#if UNITY_EDITOR
         Quaternion localRotation = Quaternion.LookRotation(localForward, localUp);
-
         TrackEndcapData endcapData = new TrackEndcapData(_trackConstraintsData);
         endcapData.GenerateEndcapData();
-
         TrackEndcap endcap = new TrackEndcap(_settings.railMaterial, _settings.baseMaterial, endcapData.railMeshData, endcapData.baseMeshData);
-
         GameObject endcapGO = endcap.Generate(localPosition, localRotation);
-        endcapGO.transform.SetParent(transform, true);
-
-        _generatedGameObjects.Add(endcapGO);
+        Undo.RegisterCreatedObjectUndo(endcapGO, "Create Endcap");
+        Transform root = GetOrCreateRoot();
+        Undo.SetTransformParent(endcapGO.transform, root, "Attach endcap to root");
+#endif
     }
 
     private void GenerateTrackAlongSpline()
@@ -153,13 +163,14 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
                 Vector3 currPos = _splineContainer.EvaluatePosition(t);
                 distanceFromLastRing = Vector3.Distance(prevPos, currPos);
             }
-
+#if UNITY_EDITOR
             TrackSegment trackSegment = new TrackSegment(_settings.deckMaterial, _settings.railMaterial, _settings.baseMaterial, trackRingsData.deckMeshData, trackRingsData.railMeshData, trackRingsData.baseMeshData);
             Quaternion localRotation = Quaternion.LookRotation(localForward, localUp);
             GameObject trackSegmentGO = trackSegment.Generate();
-            trackSegmentGO.transform.SetParent(transform, true);
-
-            _generatedGameObjects.Add(trackSegmentGO);
+            Undo.RegisterCreatedObjectUndo(trackSegmentGO, "Create Track Segment");
+            Transform root = GetOrCreateRoot();
+            Undo.SetTransformParent(trackSegmentGO.transform, root, "Attach trackSegment to root");
+#endif
         }
     }
 

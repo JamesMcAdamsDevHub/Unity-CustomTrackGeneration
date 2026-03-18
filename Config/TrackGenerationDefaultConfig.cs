@@ -14,8 +14,11 @@ public class TrackGenerationDefaultConfig : ScriptableObject
 
     [Header("Track Materials")]
     public Material DeckMaterial;
+    [Range(0.01f, 5f)] public float DeckMaterialTileSize;
     public Material RailMaterial;
+    [Range(0.01f, 5f)] public float RailMaterialTileSize;
     public Material BaseMaterial;
+    [Range(0.01f, 5f)] public float BaseMaterialTileSize;
 
 #if UNITY_EDITOR
     private void OnValidate()

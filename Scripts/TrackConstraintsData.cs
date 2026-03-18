@@ -6,4 +6,7 @@ public class TrackConstraintsData
     public float RailRidgeHeight;
     public float RailRidgePosition;
     public float DistanceBetweenRings;
+    public float DeckMaterialTileSize;
+    public float RailMaterialTileSize;
+    public float BaseMaterialTileSize;
 }

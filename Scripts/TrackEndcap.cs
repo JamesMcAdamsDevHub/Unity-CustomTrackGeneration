@@ -1,6 +1,8 @@
 using UnityEngine;
-using UnityEngine.UIElements;
-using static UnityEditor.FilePathAttribute;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class TrackEndcap
 {
@@ -12,10 +14,10 @@ public class TrackEndcap
     public TrackEndcap(Material railMaterial, Material baseMaterial, 
         MeshData railMeshData, MeshData baseMeshData)
     {
-        this._railMaterial = railMaterial;
-        this._baseMaterial = baseMaterial;
-        this._railMeshData = railMeshData;
-        this._baseMeshData = baseMeshData;
+        _railMaterial = railMaterial;
+        _baseMaterial = baseMaterial;
+        _railMeshData = railMeshData;
+        _baseMeshData = baseMeshData;
     }
 
     public GameObject Generate(Vector3 localPosition, Quaternion localRotation)
@@ -27,6 +29,9 @@ public class TrackEndcap
 
         GameObject railObject;
         railObject = new GameObject("Endcap_Rail");
+#if UNITY_EDITOR
+        Undo.RegisterCreatedObjectUndo(railObject, "Create rail Component");
+#endif
         railObject.transform.SetParent(endcapObject.transform, false);
         MeshFilter railMeshFilter = railObject.AddComponent<MeshFilter>();
         MeshRenderer railMeshRenderer = railObject.AddComponent<MeshRenderer>();
@@ -45,6 +50,9 @@ public class TrackEndcap
 
         GameObject baseObject;
         baseObject = new GameObject("Endcap_Base");
+#if UNITY_EDITOR
+        Undo.RegisterCreatedObjectUndo(baseObject, "Create Base Component");
+#endif
         baseObject.transform.SetParent(endcapObject.transform, false);
         MeshFilter baseMeshFilter = baseObject.AddComponent<MeshFilter>();
         MeshRenderer baseMeshRenderer = baseObject.AddComponent<MeshRenderer>();

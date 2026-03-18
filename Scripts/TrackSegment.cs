@@ -1,5 +1,9 @@
 using UnityEngine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class TrackSegment
 {
     private Material _deckMaterial;
@@ -12,14 +16,13 @@ public class TrackSegment
     public TrackSegment(Material deckMaterial, Material railMaterial, Material baseMaterial, 
         MeshData deckMeshData, MeshData railMeshData, MeshData baseMeshData)
     {
-        this._deckMaterial = deckMaterial;
-        this._railMaterial = railMaterial;
-        this._baseMaterial = baseMaterial;
-        this._deckMeshData = deckMeshData;
-        this._railMeshData = railMeshData;
-        this._baseMeshData = baseMeshData;
+        _deckMaterial = deckMaterial;
+        _railMaterial = railMaterial;
+        _baseMaterial = baseMaterial;
+        _deckMeshData = deckMeshData;
+        _railMeshData = railMeshData;
+        _baseMeshData = baseMeshData;
     }
-
     public GameObject Generate()
     {
         GameObject trackSegmentObject;
@@ -29,6 +32,9 @@ public class TrackSegment
 
         GameObject deckObject;
         deckObject = new GameObject("Track_Segment_Deck");
+#if UNITY_EDITOR
+        Undo.RegisterCreatedObjectUndo(deckObject, "Create Deck Component");
+#endif
         deckObject.transform.SetParent(trackSegmentObject.transform, false);
         MeshFilter deckMeshFilter = deckObject.AddComponent<MeshFilter>();
         MeshRenderer deckMeshRenderer = deckObject.AddComponent<MeshRenderer>();
@@ -47,6 +53,9 @@ public class TrackSegment
 
         GameObject railObject;
         railObject = new GameObject("Track_Segment_Rail");
+#if UNITY_EDITOR
+        Undo.RegisterCreatedObjectUndo(railObject, "Create Rail Component");
+#endif
         railObject.transform.SetParent(trackSegmentObject.transform, false);
         MeshFilter railMeshFilter = railObject.AddComponent<MeshFilter>();
         MeshRenderer railMeshRenderer = railObject.AddComponent<MeshRenderer>();
@@ -65,6 +74,9 @@ public class TrackSegment
 
         GameObject baseObject;
         baseObject = new GameObject("Track_Segment_Base");
+#if UNITY_EDITOR
+        Undo.RegisterCreatedObjectUndo(baseObject, "Create Base Component");
+#endif
         baseObject.transform.SetParent(trackSegmentObject.transform, false);
         MeshFilter baseMeshFilter = baseObject.AddComponent<MeshFilter>();
         MeshRenderer baseMeshRenderer = baseObject.AddComponent<MeshRenderer>();
