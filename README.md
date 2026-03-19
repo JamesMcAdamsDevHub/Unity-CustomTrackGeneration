@@ -57,6 +57,7 @@ without explicit written permission.
 
 #### UML Key
 - **Blue**   -  Driver Class
+- **Orange** -  Abstract Class
 - **Green**  -  ScriptableObject
 - **Yellow** -  GameObject Creation Class
 - **Grey**   -  Data Container Class
