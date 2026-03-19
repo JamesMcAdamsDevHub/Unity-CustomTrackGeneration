@@ -44,21 +44,21 @@ public class TrackRingsData
         updatePreviousU();
     }
 
-    void updateCurrentU()
+    private void updateCurrentU()
     {
         _currentDeckV = _trackConstraintsData.DeckMaterialTileSize * _distanceAlongTrack / 40f;
         _currentRailU = _trackConstraintsData.RailMaterialTileSize * _distanceAlongTrack / 20f;
         _currentBaseU = _trackConstraintsData.BaseMaterialTileSize * _distanceAlongTrack / 20f;
     }
 
-    void updatePreviousU()
+    private void updatePreviousU()
     {
         _previousDeckV = _currentDeckV;
         _previousRailU = _currentRailU;
         _previousBaseU = _currentBaseU;
     }
 
-    void AddDeckVerts(TrackRingVectorData vectorData, Vector3 localPosition)
+    private void AddDeckVerts(TrackRingVectorData vectorData, Vector3 localPosition)
     {
         int idx = deckMeshData.vertices.Count;
         if (idx > 2)
@@ -74,7 +74,7 @@ public class TrackRingsData
         deckMeshData.vertices.Add(localPosition - vectorData.TrackWidthFromCenter + vectorData.TrackHeight);
     }
 
-    void AddDeckTriangles()
+    private void AddDeckTriangles()
     {
         if (deckMeshData.vertices.Count == 2) return;
 
@@ -86,7 +86,7 @@ public class TrackRingsData
         deckMeshData.triangles.Add(startIdx + 1); deckMeshData.triangles.Add(startIdx + nextIdx); deckMeshData.triangles.Add(startIdx + 1 + nextIdx);
     }
 
-    void AddDeckUVs()
+    private void AddDeckUVs()
     {
         if (deckMeshData.vertices.Count == 2)
             return;
@@ -102,7 +102,7 @@ public class TrackRingsData
 
     }
 
-    void AddRailVerts(TrackRingVectorData vectorData, Vector3 localPosition)
+    private void AddRailVerts(TrackRingVectorData vectorData, Vector3 localPosition)
     {
         int idx = railMeshData.vertices.Count;
         if (idx > 8)
@@ -131,7 +131,7 @@ public class TrackRingsData
         railMeshData.vertices.Add(localPosition + vectorData.RailWidthFromCenter + vectorData.TrackHeight);
     }
 
-    void AddRailTriangles()
+    private void AddRailTriangles()
     {
         if (railMeshData.vertices.Count == 8) return;
 
@@ -155,7 +155,7 @@ public class TrackRingsData
         railMeshData.triangles.Add(startIdx + 7); railMeshData.triangles.Add(startIdx + 6 + nextIdx); railMeshData.triangles.Add(startIdx + 7 + nextIdx);
     }
 
-    void AddRailUVs()
+    private void AddRailUVs()
     {
         if (railMeshData.vertices.Count == 8)
             return;
@@ -197,7 +197,7 @@ public class TrackRingsData
         railMeshData.uvs.Add(new Vector2(_currentRailU, 0f));
     }
 
-    void AddBaseVerts (TrackRingVectorData vectorData, Vector3 localPosition)
+    private void AddBaseVerts (TrackRingVectorData vectorData, Vector3 localPosition)
     {   
         int idx = baseMeshData.vertices.Count;
         if (idx > 6)
@@ -221,7 +221,7 @@ public class TrackRingsData
         baseMeshData.vertices.Add(localPosition + vectorData.TrackWidthFromCenter);
     }
 
-    void AddBaseTriangles()
+    private void AddBaseTriangles()
     {
         if (baseMeshData.vertices.Count == 6) return;
 
@@ -240,7 +240,7 @@ public class TrackRingsData
         baseMeshData.triangles.Add(startIdx + 4); baseMeshData.triangles.Add(startIdx + 4 + nextIdx); baseMeshData.triangles.Add(startIdx + 5);
         baseMeshData.triangles.Add(startIdx + 5); baseMeshData.triangles.Add(startIdx + 4 + nextIdx); baseMeshData.triangles.Add(startIdx + 5 + nextIdx);
     }
-    void AddBaseUVs()
+    private void AddBaseUVs()
     {
         if (baseMeshData.vertices.Count == 6)
             return;

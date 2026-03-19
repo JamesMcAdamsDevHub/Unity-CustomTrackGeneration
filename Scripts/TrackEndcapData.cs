@@ -67,9 +67,6 @@ public class TrackEndcapData
         baseMeshData.vertices.Add(trackWidthFromCenter + trackDepth);
         baseMeshData.vertices.Add(-trackWidthFromCenter);
         baseMeshData.vertices.Add(trackWidthFromCenter);
-        
-        
-        
 
         AddRectangularSetOfTriangles(baseMeshData);
         AddRectangularUVs(baseMeshData, _trackConstraintsData.TrackWidth);
@@ -197,7 +194,7 @@ public class TrackEndcapData
         AddTriangularUVs(railMeshData);
     }
 
-    void AddRectangularUVs(MeshData meshData, float width)
+    private void AddRectangularUVs(MeshData meshData, float width)
     {
         int U1 = (int)Mathf.Clamp(width / _trackConstraintsData.RailWidth * _trackConstraintsData.RailMaterialTileSize, 1, 10);
         meshData.uvs.Add(new Vector2(0, 0)); // Left-Bottom
@@ -206,21 +203,21 @@ public class TrackEndcapData
         meshData.uvs.Add(new Vector2(U1, 1)); // Right-Top
     }
 
-    void AddRectangularSetOfTriangles(MeshData meshData)
+    private void AddRectangularSetOfTriangles(MeshData meshData)
     {
         int startIdx = meshData.vertices.Count - 4;
         meshData.triangles.Add(startIdx); meshData.triangles.Add(startIdx + 1); meshData.triangles.Add(startIdx + 2);
         meshData.triangles.Add(startIdx + 2); meshData.triangles.Add(startIdx + 1); meshData.triangles.Add(startIdx + 3);
     }
 
-    void AddTriangularUVs(MeshData meshData)
+    private void AddTriangularUVs(MeshData meshData)
     {
         meshData.uvs.Add(new Vector2(1, 0)); // Left-Bottom
         meshData.uvs.Add(new Vector2(0, 0)); // Right-Bottom
         meshData.uvs.Add(new Vector2(0, 1)); // Left-Top
     }
 
-    void AddTriangularTriangle(MeshData meshData)
+    private void AddTriangularTriangle(MeshData meshData)
     {
         int startIdx = meshData.vertices.Count - 3;
         meshData.triangles.Add(startIdx); meshData.triangles.Add(startIdx + 1); meshData.triangles.Add(startIdx + 2);

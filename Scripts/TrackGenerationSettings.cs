@@ -74,7 +74,6 @@ public class TrackGenerationSettings
         railMaterialTileSize = Mathf.Clamp(railMaterialTileSize, 0.01f, 5f);
         baseMaterialTileSize = Mathf.Clamp(baseMaterialTileSize, 0.01f, 5f);
     }
-
     public void CopyTo(TrackConstraintsData data)
     {
         data.TrackWidth = trackWidth;

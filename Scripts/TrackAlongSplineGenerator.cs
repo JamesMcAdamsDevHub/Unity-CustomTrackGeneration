@@ -174,7 +174,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         }
     }
 
-    float GetNextPosAlongSpline(float t, float maxPosAlongSpline)
+    private float GetNextPosAlongSpline(float t, float maxPosAlongSpline)
     {
         const float INCREMENT_VAL = 0.01f;
         Vector3 currPos = _splineContainer.EvaluatePosition(t), nextPos;

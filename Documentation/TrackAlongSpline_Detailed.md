@@ -2,9 +2,11 @@
 
 ### UML Diagram
 ![Track Along Spline Generator (UML Diagram)](UML_Diagrams/TrackAlongSplineGenerator_UML.png)
+![Track Along Spline Generator (UML Diagram)](UML_Diagrams/TrackGenerationDataContainers_UML.png)
 
 #### UML Key
 - **Blue**   -  Driver Class
+- **Orange** -  Abstract Class
 - **Green**  -  ScriptableObject
 - **Yellow** -  GameObject Creation Class
 - **Grey**   -  Data Container Class
