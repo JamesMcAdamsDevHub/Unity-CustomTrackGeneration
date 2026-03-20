@@ -7,17 +7,21 @@ public class TrackGenerationSettings
     public bool useConfig;
     public TrackGenerationDefaultConfig trackConfig;
 
-    [Header("Track Constraints")]
+    [Header("Track Dimensions")]
     [Range(50f, 300f)] public float trackWidth = 100f;
     [Range(0.1f, 10f)] public float trackHeight = 1f;
+
+    [Header("Rail Dimensions")]
     [Range(1f, 20f)] public float railWidth = 2f;
     [Range(0f, 20f)] public float railRidgeHeight = 1f;
     [Range(0f, 1f), Tooltip("Ridge Position [0,1]. 0 = Vertical inner edge, 1 = Vertical outer edge")]
-    public float railRidgePosition = 0.5f;
-    [Range(0.5f, 200f), Tooltip("Smaller Distance = Smoother Track")]
+    public float railRidgeOffset = 0.5f;
+
+    [Header("Mesh Resolution")]
+    [Range(0.5f, 200f), Tooltip("Distance between generated rings of vertices. Smaller values produce smoother geometry but increase vertex count.")]
     public float distanceBetweenRings = 5f;
 
-    [Header("Track Materials")]
+    [Header("Materials")]
     public Material deckMaterial;
     [Range(0.01f, 5f)] public float deckMaterialTileSize;
     public Material railMaterial;
@@ -43,7 +47,7 @@ public class TrackGenerationSettings
         trackHeight = trackConfig.TrackHeight;
         railWidth = trackConfig.RailWidth;
         railRidgeHeight = trackConfig.RailRidgeHeight;
-        railRidgePosition = trackConfig.RailRidgePosition;
+        railRidgeOffset = trackConfig.RailRidgePosition;
         distanceBetweenRings = trackConfig.DistanceBetweenRings;
 
         if (trackConfig.DeckMaterial == null ||
@@ -68,7 +72,7 @@ public class TrackGenerationSettings
         trackHeight = Mathf.Clamp(trackHeight, 0.1f, 10f);
         railWidth = Mathf.Clamp(railWidth, 1f, 20f);
         railRidgeHeight = Mathf.Clamp(railRidgeHeight, 0f, 20f);
-        railRidgePosition = Mathf.Clamp(railRidgePosition, 0f, 1f);
+        railRidgeOffset = Mathf.Clamp(railRidgeOffset, 0f, 1f);
         distanceBetweenRings = Mathf.Clamp(distanceBetweenRings, 0.5f, 200f);
         deckMaterialTileSize = Mathf.Clamp(deckMaterialTileSize, 0.01f, 5f);
         railMaterialTileSize = Mathf.Clamp(railMaterialTileSize, 0.01f, 5f);
@@ -80,7 +84,7 @@ public class TrackGenerationSettings
         data.TrackHeight = trackHeight;
         data.RailWidth = railWidth;
         data.RailRidgeHeight = railRidgeHeight;
-        data.RailRidgePosition = railRidgePosition;
+        data.RailRidgePosition = railRidgeOffset;
         data.DistanceBetweenRings = distanceBetweenRings;
         data.DeckMaterialTileSize = deckMaterialTileSize;
         data.RailMaterialTileSize = railMaterialTileSize;

@@ -1,3 +1,4 @@
+using System.Drawing;
 using UnityEngine;
 
 public class TrackRingsData
@@ -21,23 +22,23 @@ public class TrackRingsData
         _trackConstraintsData = trackConstraintsData;
     }
 
-    public void GenerateRingAtPoint(Vector3 localPosition, Vector3 forward, Vector3 up, float distanceFromLastRing)
+    public void GenerateRingAtPoint(LocalPointData point, float distanceFromLastRing)
     {
-        TrackRingVectorData vectorData = new TrackRingVectorData(_trackConstraintsData, forward, up);
+        TrackRingVectorData vectorData = new TrackRingVectorData(_trackConstraintsData, point.localForward, point.localUp);
 
         _distanceAlongTrack += distanceFromLastRing;
         
         updateCurrentU();
 
-        AddDeckVerts(vectorData, localPosition);
+        AddDeckVerts(vectorData, point.localPosition);
         AddDeckTriangles();
         AddDeckUVs();
 
-        AddRailVerts(vectorData, localPosition);
+        AddRailVerts(vectorData, point.localPosition);
         AddRailTriangles();
         AddRailUVs();
 
-        AddBaseVerts(vectorData, localPosition);
+        AddBaseVerts(vectorData, point.localPosition);
         AddBaseTriangles();
         AddBaseUVs();
 

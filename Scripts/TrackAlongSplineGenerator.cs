@@ -12,54 +12,15 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
     [SerializeField] private bool _generateStartEndcap;
     [SerializeField] private bool _generateEndEndcap;
 
-    [SerializeField] private TrackGenerationSettings _settings = new();
-
     [Header("Spline Container")]
     [SerializeField] private SplineContainer _splineContainer;
 
-    private TrackConstraintsData _trackConstraintsData = new TrackConstraintsData();
-    private const string ROOT_NAME = "Track_Root";
+    private LocalPointData startEndcapPoint = new LocalPointData();
+    private LocalPointData endEndcapPoint = new LocalPointData();
 
-    private void OnValidate()
-    {
-        if (_settings != null)
-        {
-            _settings.UpdateConstraints(this);
-        }
-    }
-     
-    public override void GenerateTrack()
-    {
-        if (_settings == null) return;
+    protected override string ROOT_NAME => "Spline_Track_Root";
 
-        _settings.CopyTo(_trackConstraintsData);
-        GenerateNewTrack();
-    }
-
-    public override void RefreshFromConfig()
-    {
-        if (_settings != null)
-        {
-            _settings.UpdateConstraints(this);
-        }
-    }
-
-    private Transform GetOrCreateRoot()
-    {
-        Transform existing = transform.Find(ROOT_NAME);
-        if (existing != null)
-            return existing;
-
-        GameObject root = new GameObject(ROOT_NAME);
-#if UNITY_EDITOR
-        Undo.RegisterCreatedObjectUndo(root, "Create Track Root");
-        Undo.SetTransformParent(root.transform, transform, "Attach root to parent");
-#endif
-
-        return root.transform;
-    }
-
-    private void GenerateNewTrack()
+    protected override void GenerateNewTrack()
     {
         if (_splineContainer == null)
         {
@@ -67,64 +28,59 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
             return;
         }
 
-        DestroyPreviousTrack();
-        GenerateEndcaps();
         GenerateTrackAlongSpline();
+        GenerateEndcaps();
     }
-
-    private void DestroyPreviousTrack()
-    {
-        Transform root = transform.Find(ROOT_NAME);
-
-        if (root == null) return;
-
-#if UNITY_EDITOR
-        Undo.DestroyObjectImmediate(root.gameObject);
-#endif
-    }
-
 
     private void GenerateEndcaps()
     {
+        PopulateEndcapPoints();
+
         if (_generateStartEndcap)
         {
-            GenerateSpecifiedEndcap(true);
+            GenerateSpecifiedEndcap(startEndcapPoint);
         }
 
         if (_generateEndEndcap)
         {
-            GenerateSpecifiedEndcap(false);
+            GenerateSpecifiedEndcap(endEndcapPoint);
         }
-    }
+}
 
-    private void GenerateSpecifiedEndcap(bool isStartEndcap)
+    private void PopulateEndcapPoints()
     {
+        if (_splineContainer == null)
+        {
+            Debug.LogWarning("Could not generate track: SplineContainer not assigned.", this);
+            return;
+        }
+
         float3 posTemp, tanTemp, upTemp;
-        float t = isStartEndcap ? 0f : 1f;
-        _splineContainer.Evaluate(t, out posTemp, out tanTemp, out upTemp);
+        Vector3 localPosition, localForward, localUp;
 
-        Vector3 localPosition = (Vector3)posTemp;
-        Vector3 localForward = ((Vector3)tanTemp).normalized;
-        Vector3 localUp = ((Vector3)upTemp).normalized;
+        _splineContainer.Evaluate(0, out posTemp, out tanTemp, out upTemp);
 
-        if (!isStartEndcap) localForward *= -1f;
-#if UNITY_EDITOR
-        Quaternion localRotation = Quaternion.LookRotation(localForward, localUp);
-        TrackEndcapData endcapData = new TrackEndcapData(_trackConstraintsData);
-        endcapData.GenerateEndcapData();
-        TrackEndcap endcap = new TrackEndcap(_settings.railMaterial, _settings.baseMaterial, endcapData.railMeshData, endcapData.baseMeshData);
-        GameObject endcapGO = endcap.Generate(localPosition, localRotation);
-        Undo.RegisterCreatedObjectUndo(endcapGO, "Create Endcap");
-        Transform root = GetOrCreateRoot();
-        Undo.SetTransformParent(endcapGO.transform, root, "Attach endcap to root");
-#endif
+        localPosition = (Vector3)posTemp;
+        localForward = ((Vector3)tanTemp).normalized;
+        localUp = ((Vector3)upTemp).normalized;
+
+        startEndcapPoint.localPosition = localPosition;
+        startEndcapPoint.localForward = localForward;
+        startEndcapPoint.localUp = localUp;
+
+        _splineContainer.Evaluate(1, out posTemp, out tanTemp, out upTemp);
+
+        localPosition = (Vector3)posTemp;
+        localForward = ((Vector3)tanTemp).normalized * -1;
+        localUp = ((Vector3)upTemp).normalized;
+
+        endEndcapPoint.localPosition = localPosition;
+        endEndcapPoint.localForward = localForward;
+        endEndcapPoint.localUp = localUp;
     }
 
-    private void GenerateTrackAlongSpline()
+    private void GenerateTrackAlongSpline() 
     {
-        const int MAX_VERTS_PER_TRACK = 6000;
-        const int VERTS_PER_RING = 20;
-        const int RINGS_PER_TRACK = MAX_VERTS_PER_TRACK / VERTS_PER_RING;
         float maxTrackLength = (float)RINGS_PER_TRACK * _settings.distanceBetweenRings;
         float splineLength = _splineContainer.Spline.GetLength();
         int numTracks = (int)(splineLength / maxTrackLength) + 1;
@@ -150,27 +106,23 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
                 localPosition = (Vector3)posTemp;
                 localForward = ((Vector3)tanTemp).normalized;
                 localUp = ((Vector3)upTemp).normalized;
+                LocalPointData newPoint = new LocalPointData(localPosition, localForward, localUp);
 
                 // Generate MeshData in trackRingsData at t
-                trackRingsData.GenerateRingAtPoint(localPosition, localForward, localUp, distanceFromLastRing);
+                trackRingsData.GenerateRingAtPoint(newPoint, distanceFromLastRing);
 
                 if (t >= nextMaxPosAlongSpline) break;
 
                 Vector3 prevPos = _splineContainer.EvaluatePosition(t);
+
                 // Get next position along spline
                 t = GetNextPosAlongSpline(t, nextMaxPosAlongSpline);
 
                 Vector3 currPos = _splineContainer.EvaluatePosition(t);
                 distanceFromLastRing = Vector3.Distance(prevPos, currPos);
             }
-#if UNITY_EDITOR
-            TrackSegment trackSegment = new TrackSegment(_settings.deckMaterial, _settings.railMaterial, _settings.baseMaterial, trackRingsData.deckMeshData, trackRingsData.railMeshData, trackRingsData.baseMeshData);
-            Quaternion localRotation = Quaternion.LookRotation(localForward, localUp);
-            GameObject trackSegmentGO = trackSegment.Generate();
-            Undo.RegisterCreatedObjectUndo(trackSegmentGO, "Create Track Segment");
-            Transform root = GetOrCreateRoot();
-            Undo.SetTransformParent(trackSegmentGO.transform, root, "Attach trackSegment to root");
-#endif
+
+            CreateTrackSegment(trackRingsData.deckMeshData, trackRingsData.railMeshData, trackRingsData.baseMeshData);
         }
     }
 
