@@ -782,14 +782,14 @@ MonoBehaviour:
         z: 20
       Rotation:
         value:
-          x: 0.0018308879
-          y: 0.7071044
-          z: 0.0018308879
-          w: 0.7071044
+          x: 0
+          y: 0
+          z: 0
+          w: 1
     - Position:
-        x: 200
+        x: 0
         y: 0
-        z: 0
+        z: 200
       TangentIn:
         x: -0
         y: -0
@@ -800,10 +800,10 @@ MonoBehaviour:
         z: 20
       Rotation:
         value:
-          x: -0.0021609326
-          y: 0.7071035
-          z: -0.0021609326
-          w: 0.7071035
+          x: 0
+          y: 0
+          z: 0
+          w: 1
     m_MetaData:
     - Mode: 0
       Tension: 0.5
@@ -832,23 +832,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 763a1dd291eb7624c91bc1d6c13d0c7c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TrackAlongSplineGenerator
-  _generateStartEndcap: 1
-  _generateEndEndcap: 1
   _settings:
     useConfig: 1
     trackConfig: {fileID: 11400000, guid: bdfae3361580e32489cb5f388288c410, type: 2}
-    trackWidth: 100
-    trackHeight: 2
+    trackWidth: 147
+    trackHeight: 3.58
     railWidth: 12
-    railRidgeHeight: 3
-    railRidgePosition: 0.7
-    distanceBetweenRings: 50
+    railRidgeHeight: 10
+    railRidgeOffset: 0
+    distanceBetweenRings: 80
     deckMaterial: {fileID: 2100000, guid: 2a2d1a2017eb8fd4aba3ffbf3b40df7f, type: 2}
     deckMaterialTileSize: 1
     railMaterial: {fileID: 2100000, guid: 6e04036147caec142af2db63eed77810, type: 2}
     railMaterialTileSize: 1
     baseMaterial: {fileID: 2100000, guid: 9838e17712bbcf54ba439b0517ec08fd, type: 2}
     baseMaterialTileSize: 1
+  _generateStartEndcap: 1
+  _generateEndEndcap: 1
   _splineContainer: {fileID: 9196354146296142212}
 --- !u!1 &7641970583071050996
 GameObject:

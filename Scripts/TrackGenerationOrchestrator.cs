@@ -57,6 +57,10 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         Undo.SetTransformParent(root.transform, transform, "Attach root to parent");
 #endif
 
+        root.transform.localPosition = Vector3.zero;
+        root.transform.localRotation = Quaternion.identity;
+        root.transform.localScale = Vector3.one;
+
         return root.transform;
     }
 
@@ -71,6 +75,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         Undo.RegisterCreatedObjectUndo(endcapGO, "Create Endcap");
         Transform root = GetOrCreateRoot();
         Undo.SetTransformParent(endcapGO.transform, root, "Attach endcap to root");
+        endcapGO.transform.localScale = Vector3.one;
 #endif
     }
 
@@ -88,12 +93,24 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
     protected void CreateTrackSegment(MeshData deckMeshData, MeshData railMeshData, MeshData baseMeshData)
     {
 #if UNITY_EDITOR
-        TrackSegment trackSegment = new TrackSegment(_settings.deckMaterial, _settings.railMaterial, _settings.baseMaterial,
-                deckMeshData, railMeshData, baseMeshData);
+        TrackSegment trackSegment = new TrackSegment(
+            _settings.deckMaterial,
+            _settings.railMaterial,
+            _settings.baseMaterial,
+            deckMeshData,
+            railMeshData,
+            baseMeshData
+        );
+
         GameObject trackSegmentGO = trackSegment.Generate();
         Undo.RegisterCreatedObjectUndo(trackSegmentGO, "Create Track Segment");
+
         Transform root = GetOrCreateRoot();
         Undo.SetTransformParent(trackSegmentGO.transform, root, "Attach trackSegment to root");
+
+        trackSegmentGO.transform.localPosition = Vector3.zero;
+        trackSegmentGO.transform.localRotation = Quaternion.identity;
+        trackSegmentGO.transform.localScale = Vector3.one;
 #endif
     }
 }

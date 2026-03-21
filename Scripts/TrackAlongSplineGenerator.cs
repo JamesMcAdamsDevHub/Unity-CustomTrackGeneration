@@ -103,9 +103,9 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
             {
                 // Get local values at t along spline
                 _splineContainer.Evaluate(t, out posTemp, out tanTemp, out upTemp);
-                localPosition = (Vector3)posTemp;
-                localForward = ((Vector3)tanTemp).normalized;
-                localUp = ((Vector3)upTemp).normalized;
+                localPosition = transform.InverseTransformPoint((Vector3)posTemp);
+                localForward = transform.InverseTransformDirection((Vector3)tanTemp).normalized;
+                localUp = transform.InverseTransformDirection((Vector3)upTemp).normalized;
                 LocalPointData newPoint = new LocalPointData(localPosition, localForward, localUp);
 
                 // Generate MeshData in trackRingsData at t

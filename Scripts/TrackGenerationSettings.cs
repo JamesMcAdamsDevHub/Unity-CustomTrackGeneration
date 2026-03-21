@@ -4,7 +4,7 @@ using UnityEngine;
 public class TrackGenerationSettings
 {
     [Header("Default Track Configuration")]
-    public bool useConfig;
+    public bool useConfig = true;
     public TrackGenerationDefaultConfig trackConfig;
 
     [Header("Track Dimensions")]
