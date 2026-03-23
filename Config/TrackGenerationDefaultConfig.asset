@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17adc42a7e4fcef4484a482d1f426930, type: 3}
   m_Name: TrackGenerationDefaultConfig
   m_EditorClassIdentifier: Assembly-CSharp::TrackGenerationDefaultConfig
-  TrackWidth: 173
+  TrackWidth: 100
   TrackHeight: 3.58
   RailWidth: 12.123442
   RailRidgeHeight: 10

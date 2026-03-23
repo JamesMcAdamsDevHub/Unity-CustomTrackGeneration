@@ -90,16 +90,16 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
 #endif
     }
 
-    protected void CreateTrackSegment(MeshData deckMeshData, MeshData railMeshData, MeshData baseMeshData)
+    protected void CreateTrackSegment(TrackRingsData trackRingsData)
     {
 #if UNITY_EDITOR
         TrackSegment trackSegment = new TrackSegment(
             _settings.deckMaterial,
             _settings.railMaterial,
             _settings.baseMaterial,
-            deckMeshData,
-            railMeshData,
-            baseMeshData
+            trackRingsData.deckMeshData,
+            trackRingsData.railMeshData,
+            trackRingsData.baseMeshData
         );
 
         GameObject trackSegmentGO = trackSegment.Generate();

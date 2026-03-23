@@ -122,7 +122,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
                 distanceFromLastRing = Vector3.Distance(prevPos, currPos);
             }
 
-            CreateTrackSegment(trackRingsData.deckMeshData, trackRingsData.railMeshData, trackRingsData.baseMeshData);
+            CreateTrackSegment(trackRingsData);
         }
     }
 
