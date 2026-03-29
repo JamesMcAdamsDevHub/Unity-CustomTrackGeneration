@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.Splines;
+using UnityEngine.UI;
+
 
 
 #if UNITY_EDITOR
@@ -27,46 +29,45 @@ public class TrackLoopGenerator : TrackGenerationOrchestrator
         Tooltip("Normalized percentage of a track roll along loop.")]
     private float _embankment = 0.5f;
 
+    [SerializeField]
+    private bool _loopsRight = true;
+
     protected override string ROOT_NAME => "Loop_Root";
 
     protected override void GenerateNewTrack()
     {
         TrackRingsData trackRingsData = new TrackRingsData(_trackConstraintsData);
         float lateralOffset = (_loopGap == 0f) ? 0f : _settings.trackWidth + _loopGap;
+        if (!_loopsRight) lateralOffset *= -1;
         Vector3 rollOffset = GetRollOffset();
 
         float distanceFromLastPosition = 0f;
-        Vector3 currentPosition = Vector3.zero;
-        Vector3 localForward = Vector3.forward;
-        Vector3 localUp = Vector3.up;
+        LocalPointData currentPoint = new LocalPointData();
         for (int ringIdx = 1; ringIdx <= RINGS_PER_TRACK; ringIdx++)
         {
-            AddRingAtPoint(trackRingsData, currentPosition, localForward, localUp, distanceFromLastPosition);
+            trackRingsData.GenerateRingAtPoint(currentPoint, distanceFromLastPosition);
 
-            float progression = GetProgressionAlongLoop(ringIdx);
+            float progression = GetLoopProgression(ringIdx);
             float theta = GetTheta(progression);
-            currentPosition = GetLoopPosition(lateralOffset, progression, theta);
+            currentPoint.localPosition = GetLoopPosition(lateralOffset, progression, theta);
 
-            float nextProgression = GetProgressionAlongLoop(ringIdx + 1);
+            float nextProgression = GetLoopProgression(ringIdx + 1);
             float nextTheta = GetTheta(nextProgression);
             Vector3 nextPosition = GetLoopPosition(lateralOffset, nextProgression, nextTheta);
 
-            localForward = GetLocalForward(theta);
-            Vector3 loopCenter = GetLoopCenterAtX(currentPosition.x);
-            localUp = GetLocalUp(currentPosition, loopCenter, rollOffset, theta);
+            currentPoint.localForward = GetLocalForward(theta);
 
-            distanceFromLastPosition = Vector3.Distance(currentPosition, nextPosition);
+            Vector3 loopCenter = GetLoopCenterAtX(currentPoint.localPosition.x);
+            currentPoint.localUp = GetLocalUp(currentPoint.localPosition, loopCenter, rollOffset, theta);
+
+            distanceFromLastPosition = Vector3.Distance(currentPoint.localPosition, nextPosition);
         }
-        AddRingAtPoint(trackRingsData, currentPosition, localForward, localUp, distanceFromLastPosition);
+        GenerateConnectionPoint(currentPoint, "End_Connection");
+        trackRingsData.GenerateRingAtPoint(currentPoint, distanceFromLastPosition);
         CreateTrackSegment(trackRingsData);
     }
 
-    private void AddRingAtPoint(TrackRingsData trackRingsData, Vector3 currentPosition, Vector3 localForward, Vector3 localUp, float distanceFromLastPosition)
-    {
-        LocalPointData pointData = new LocalPointData(currentPosition, localForward, localUp);
-        trackRingsData.GenerateRingAtPoint(pointData, distanceFromLastPosition);
-    }
-    private float GetProgressionAlongLoop(int ringIdx)
+    private float GetLoopProgression(int ringIdx)
     {
         return (float)ringIdx / RINGS_PER_TRACK * _loopPercentage;
     }
@@ -97,7 +98,7 @@ public class TrackLoopGenerator : TrackGenerationOrchestrator
 
     private Vector3 GetRollOffset()
     {
-        return new Vector3(_embankment, 0f, 0f);
+        return new Vector3(_embankment * (_loopsRight ? 1 : -1), 0f, 0f);
     }
 
     private Vector3 GetLocalUp(Vector3 currentPosition, Vector3 loopCenter, Vector3 rollOffset, float theta)

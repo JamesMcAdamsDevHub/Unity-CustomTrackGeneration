@@ -20,6 +20,16 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
 
     protected override string ROOT_NAME => "Spline_Track_Root";
 
+    protected override void ConnectionUpdate(string ID) 
+    {
+        if (ID == START_CONNECTION_ID && _generateStartEndcap)
+        {
+            // TODO: Destroy Start Endcap
+        }
+
+        // TODO: Destroy End Endcap
+    }
+
     protected override void GenerateNewTrack()
     {
         if (_splineContainer == null)
@@ -99,6 +109,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
             nextMaxPosAlongSpline += splineDistancePerTrack;
             if (i == numTracks) nextMaxPosAlongSpline = 1f;
             float distanceFromLastRing = 0;
+            LocalPointData newPoint = new LocalPointData();
             while (t <= nextMaxPosAlongSpline)
             {
                 // Get local values at t along spline
@@ -106,7 +117,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
                 localPosition = transform.InverseTransformPoint((Vector3)posTemp);
                 localForward = transform.InverseTransformDirection((Vector3)tanTemp).normalized;
                 localUp = transform.InverseTransformDirection((Vector3)upTemp).normalized;
-                LocalPointData newPoint = new LocalPointData(localPosition, localForward, localUp);
+                newPoint = new LocalPointData(localPosition, localForward, localUp);
 
                 // Generate MeshData in trackRingsData at t
                 trackRingsData.GenerateRingAtPoint(newPoint, distanceFromLastRing);
@@ -121,7 +132,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
                 Vector3 currPos = _splineContainer.EvaluatePosition(t);
                 distanceFromLastRing = Vector3.Distance(prevPos, currPos);
             }
-
+            GenerateConnectionPoint(newPoint, "End_Connection");
             CreateTrackSegment(trackRingsData);
         }
     }
