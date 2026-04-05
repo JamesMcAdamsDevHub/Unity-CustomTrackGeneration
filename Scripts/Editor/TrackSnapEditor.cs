@@ -1,10 +1,16 @@
 #if UNITY_EDITOR
+using Unity.VisualScripting;
 using UnityEditor;
+using UnityEditor.Build.Content;
 using UnityEngine;
 
 [InitializeOnLoad]
 public static class TrackSnapEditor
 {
+    private static bool _isDragging;
+    private static bool _mouseHeld;
+    private static TrackGenerationOrchestrator _track;
+
     static TrackSnapEditor()
     {
         SceneView.duringSceneGui += OnSceneGUI;
@@ -13,25 +19,43 @@ public static class TrackSnapEditor
     private static void OnSceneGUI(SceneView sceneView)
     {
         Event e = Event.current;
+        if (e == null) return;
 
-        // Only trigger on mouse release
-        if (e.type != EventType.MouseUp)
-            return;
+        if ((e.type == EventType.MouseDown && e.button == 0) || e.type == EventType.DragUpdated || e.type == EventType.DragPerform)
+        {
+            _mouseHeld = true;
+        }
 
-        // Get selected object
+        if ((e.type == EventType.MouseUp && e.button == 0) || e.type == EventType.DragExited)
+        {
+            _mouseHeld = false;
+        }
+
         Transform selected = Selection.activeTransform;
-        if (selected == null)
+        if (selected != null) _track = selected.GetComponent<TrackGenerationOrchestrator>();
+
+        if (_track == null)
+        {
+            _track = null;
+            _isDragging = false;
             return;
+        }
 
-        TrackGenerationOrchestrator track =
-            selected.GetComponent<TrackGenerationOrchestrator>();
-
-        if (track == null)
+        if (_track.GetRoot() == null || _track.startConnection == null)
+        {
+            _isDragging = false;
             return;
+        }
 
-        track.DisconnectTracks();
-
-        track.TrySnap(); 
+        if (_mouseHeld && !_isDragging)
+        {
+            _isDragging = true;
+        }
+        else if (!_mouseHeld && _isDragging)
+        {
+            _track.TrySnap();
+            _isDragging = false;
+        }
     }
 }
 #endif

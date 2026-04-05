@@ -20,17 +20,17 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
     protected abstract string ROOT_NAME { get; }
     protected abstract void GenerateNewTrack();
 
-    protected virtual void ConnectionUpdate(string ID) { } // Optional functionality
+    public virtual void ConnectionAttachedUpdate(string ID) { } // Optional functionality
+    public virtual void ConnectionDettachedUpdate(string ID) { } // Optional functionality
 
-    public ConnectionPoint startConnection = null;
-    public const string START_CONNECTION_ID = "Start_Connection";
+    [SerializeField, HideInInspector] public ConnectionPoint startConnection = null;
+    protected const string START_CONNECTION_ID = "Start_Connection";
     private float _snapDistance = 100f;
 
     protected virtual void Update()
     {
 #if UNITY_EDITOR
-        Transform root = transform.Find(ROOT_NAME);
-        if (root == null)
+        if (GetRoot() == null)
             GenerateTrack();
 #endif
     }
@@ -49,11 +49,14 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
 
         _settings.CopyTo(_trackConstraintsData);
 
-        if (transform.Find(ROOT_NAME) != null)
-            DestroyPreviousTrack();
+        DisconnectTracks();
 
-        GenerateNewTrack();
+        if (GetRoot() != null)
+            DestroyPreviousTrack();
+        
         GenerateStartConnectionPoint();
+        GenerateNewTrack();
+        ConnectAdjoiningPoints();
     }
 
     public void RefreshFromConfig()
@@ -64,7 +67,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         }
     }
 
-    protected Transform GetOrCreateRoot()
+    private Transform GetOrCreateRoot()
     {
         Transform existing = transform.Find(ROOT_NAME);
         if (existing != null)
@@ -83,16 +86,21 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         return root.transform;
     }
 
-    protected void GenerateSpecifiedEndcap(LocalPointData point)
+    protected void GenerateSpecifiedEndcap(LocalPointData point, string name)
     {
+        Transform root = GetRoot();
+        if (root == null) return;
+        if (root.Find(name) != null)
+        {
+            DestroySpecifiedEndcap(name);
+        }
 #if UNITY_EDITOR
         Quaternion localRotation = Quaternion.LookRotation(point.localForward, point.localUp);
         TrackEndcapData endcapData = new TrackEndcapData(_trackConstraintsData);
         endcapData.GenerateEndcapData();
         TrackEndcap endcap = new TrackEndcap(_settings.railMaterial, _settings.baseMaterial, endcapData.railMeshData, endcapData.baseMeshData);
-        GameObject endcapGO = endcap.Generate(point.localPosition, localRotation);
+        GameObject endcapGO = endcap.Generate(point.localPosition, localRotation, name);
         Undo.RegisterCreatedObjectUndo(endcapGO, "Create Endcap");
-        Transform root = GetOrCreateRoot();
         Undo.SetTransformParent(endcapGO.transform, root, "Attach endcap to root");
         endcapGO.transform.localScale = Vector3.one;
 #endif
@@ -141,9 +149,9 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
     protected void GenerateConnectionPoint(LocalPointData localSpawnPoint, string name)
     {
 #if UNITY_EDITOR
+        Transform root = GetOrCreateRoot();
         GameObject connectionObject = new GameObject(name);
         Undo.RegisterCreatedObjectUndo(connectionObject, "Create Start Connection");
-        Transform root = GetOrCreateRoot();
         Undo.SetTransformParent(connectionObject.transform, root, "Attach Start Connection to root");
         ConnectionPoint connectionPoint = Undo.AddComponent<ConnectionPoint>(connectionObject);
         connectionObject.transform.localPosition = localSpawnPoint.localPosition;
@@ -160,27 +168,12 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
 
     public void TrySnap()
     {
-        Transform root = GetOrCreateRoot();
-        float shortestDistance = _snapDistance + 1;
-        ConnectionPoint[] points = Object.FindObjectsByType<ConnectionPoint>(FindObjectsSortMode.None);
-        ConnectionPoint closestPoint = null;
-        foreach (ConnectionPoint point in points)
-        {
-            if (point.parentObject == root) continue;
+        DisconnectTracks();
 
-            if (point.isConnected) continue;
-
-            float distance = Vector3.Distance(startConnection.transform.position, point.worldTransform.position);
-            if (distance < shortestDistance)
-            {
-                shortestDistance = distance;
-                closestPoint = point;
-            }
-        }
-
-        if (closestPoint == null || shortestDistance > _snapDistance)
-            return;
-
+        ConnectionPoint closestPoint = GetClosestConnectionPointInRange(startConnection, _snapDistance);
+        
+        if (closestPoint == null) return;
+        
         TrackGenerationOrchestrator connectionParent =
             closestPoint.parentObject.GetComponentInParent<TrackGenerationOrchestrator>();
 
@@ -209,31 +202,128 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
 
         transform.position += deltaPosition;
 
-        closestPoint.connectedPoint = startConnection;
-        startConnection.connectedPoint = closestPoint;
-        closestPoint.isConnected = true;
-        startConnection.isConnected = true;
+        ConnectAdjoiningPoints();
     }
 
     private void OnDestroy()
     {
-        DisconnectTracks();
+        ConnectionPoint[] points = GetComponentsInChildren<ConnectionPoint>(true);
+
+        foreach (ConnectionPoint point in points)
+        {
+            if (point == null) continue;
+            if (point.connectedPoint == null) continue;
+
+            ConnectionPoint other = point.connectedPoint;
+
+            TrackGenerationOrchestrator otherTrack = null;
+            if (other.parentObject != null)
+                otherTrack = other.parentObject.GetComponentInParent<TrackGenerationOrchestrator>();
+
+            string otherID = other.ID;
+
+            other.connectedPoint = null;
+            other.isConnected = false;
+
+            if (otherTrack != null)
+            {
+                otherTrack.ConnectionDettachedUpdate(otherID);
+            }
+        }
+    }
+
+    public ConnectionPoint GetClosestConnectionPointInRange(ConnectionPoint self, float maxDistance)
+    {
+        Transform root = GetRoot();
+        if (root == null) return null;
+        if (self == null) return null;
+        float shortestDistance = maxDistance + 1;
+        ConnectionPoint[] points = Object.FindObjectsByType<ConnectionPoint>(FindObjectsSortMode.None);
+        ConnectionPoint closestPoint = null;
+        foreach (ConnectionPoint point in points)
+        {
+            if (point.parentObject == root) continue;
+
+            if (point.isConnected) continue;
+
+            float distance = Vector3.Distance(self.transform.position, point.worldTransform.position);
+            if (distance < shortestDistance)
+            {
+                shortestDistance = distance;
+                closestPoint = point;
+            }
+        }
+        if (closestPoint == null || shortestDistance > maxDistance)
+            return null;
+        return closestPoint;
+    }
+
+    public void ConnectAdjoiningPoints()
+    {
+        ConnectionPoint[] points =
+        GetComponentsInChildren<ConnectionPoint>();
+        if (points == null) return;
+        foreach (ConnectionPoint point in points)
+        {
+            if (point.isConnected) continue;
+            
+            ConnectionPoint pointInRange = GetClosestConnectionPointInRange(point, 0.5f);
+            
+            if (pointInRange == null || pointInRange.isConnected) continue;
+            point.ConnectPoint(pointInRange);
+        }
     }
 
     public void DisconnectTracks()
     {
         ConnectionPoint[] points =
         GetComponentsInChildren<ConnectionPoint>();
-
-        foreach (ConnectionPoint point in points) 
+        if (points == null) return;
+        foreach (ConnectionPoint point in points)
         {
-            if (point.connectedPoint != null)
-            {
-                point.connectedPoint.isConnected = false;
-                point.connectedPoint = null;
-            }
-            point.connectedPoint = null;
-            point.isConnected = false;
+            ConnectionPoint other = point.connectedPoint;
+
+            if (other == null || !point.isConnected) continue;
+
+            point.DisconnectPoint(other);
         }
+    }
+
+    protected ConnectionPoint GetLocalConnectionPointByID(string ID)
+    {
+        Transform root = GetRoot();
+        if (root == null) return null;
+
+        ConnectionPoint[] points = root.GetComponentsInChildren<ConnectionPoint>(true);
+
+        foreach (ConnectionPoint point in points)
+        {
+            if (point == null) continue;
+            if (point.ID == ID) return point;
+        }
+
+        return null;
+    }
+
+    protected void DestroySpecifiedEndcap(string ID)
+    {
+#if UNITY_EDITOR
+        Transform root = GetRoot();
+        if (root == null) return;
+
+        foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+        {
+            if (t.name == ID)
+            {
+                DestroyImmediate(t.gameObject);
+                break;
+            }
+        }
+#endif
+    }
+
+    public Transform GetRoot()
+    {
+        return transform.Find(ROOT_NAME);
     }
 }

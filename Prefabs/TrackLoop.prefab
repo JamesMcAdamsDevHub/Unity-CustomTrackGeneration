@@ -52,14 +52,16 @@ MonoBehaviour:
     railWidth: 12.123442
     railRidgeHeight: 10
     railRidgeOffset: 0
-    distanceBetweenRings: 80
+    distanceBetweenRings: 50
     deckMaterial: {fileID: 2100000, guid: 2a2d1a2017eb8fd4aba3ffbf3b40df7f, type: 2}
     deckMaterialTileSize: 1
     railMaterial: {fileID: 2100000, guid: 6e04036147caec142af2db63eed77810, type: 2}
     railMaterialTileSize: 1
     baseMaterial: {fileID: 2100000, guid: 9838e17712bbcf54ba439b0517ec08fd, type: 2}
     baseMaterialTileSize: 1
-  _radius: 100
+  startConnection: {fileID: 0}
+  _radius: 232
   _loopPercentage: 1
   _loopGap: 0.1
   _embankment: 0.5
+  _loopsRight: 1

@@ -18,17 +18,66 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
     private LocalPointData startEndcapPoint = new LocalPointData();
     private LocalPointData endEndcapPoint = new LocalPointData();
 
+    private const string START_ENDCAP_NAME = "Start_Endcap";
+    private const string END_ENDCAP_NAME = "End_Endcap";
+
+    private const string END_CONNECTION_ID = "End_Connection";
     protected override string ROOT_NAME => "Spline_Track_Root";
 
-    protected override void ConnectionUpdate(string ID) 
+#if UNITY_EDITOR
+    private bool _isEnforcingTangents;
+#endif
+
+    public override void ConnectionAttachedUpdate(string ID)
     {
+        string targetEndcapName;
+
         if (ID == START_CONNECTION_ID && _generateStartEndcap)
         {
-            // TODO: Destroy Start Endcap
+            targetEndcapName = START_ENDCAP_NAME;
         }
-
-        // TODO: Destroy End Endcap
+        else if (ID == END_CONNECTION_ID && _generateEndEndcap)
+        {
+            targetEndcapName = END_ENDCAP_NAME;
+        }
+        else
+        {
+            return;
+        }
+        DestroySpecifiedEndcap(targetEndcapName);
     }
+
+    public override void ConnectionDettachedUpdate(string ID)
+    {
+        if (!_generateStartEndcap && !_generateEndEndcap) return;
+
+        PopulateEndcapPoints();
+
+        if (ID == START_CONNECTION_ID && _generateStartEndcap)
+            GenerateSpecifiedEndcap(startEndcapPoint, START_ENDCAP_NAME);
+        else if (ID == END_CONNECTION_ID && _generateEndEndcap)
+            GenerateSpecifiedEndcap(endEndcapPoint, END_ENDCAP_NAME);
+    }
+#if UNITY_EDITOR
+    private void OnEnable()
+    {
+        Spline.Changed += OnSplineChanged;
+    }
+
+    private void OnDisable()
+    {
+        Spline.Changed -= OnSplineChanged;
+    }
+
+    private void OnSplineChanged(Spline spline, int knotIndex, SplineModification modification)
+    {
+        if (_splineContainer == null) return;
+        if (spline != _splineContainer.Spline) return;
+        if (_isEnforcingTangents) return;
+
+        EnforceAutoTangents();
+    }
+#endif
 
     protected override void GenerateNewTrack()
     {
@@ -37,7 +86,6 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
             Debug.LogWarning("Could not generate track: SplineContainer not assigned.", this);
             return;
         }
-
         GenerateTrackAlongSpline();
         GenerateEndcaps();
     }
@@ -46,16 +94,29 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
     {
         PopulateEndcapPoints();
 
-        if (_generateStartEndcap)
+        Transform root = GetRoot();
+        if (root == null) return;
+
+        if (_generateStartEndcap && root.Find(START_ENDCAP_NAME) == null)
         {
-            GenerateSpecifiedEndcap(startEndcapPoint);
+            ConnectionPoint startPoint = GetLocalConnectionPointByID(START_CONNECTION_ID);
+
+            if (startPoint == null || !startPoint.isConnected)
+            {
+                GenerateSpecifiedEndcap(startEndcapPoint, START_ENDCAP_NAME);
+            }
         }
 
-        if (_generateEndEndcap)
+        if (_generateEndEndcap && root.Find(END_ENDCAP_NAME) == null)
         {
-            GenerateSpecifiedEndcap(endEndcapPoint);
+            ConnectionPoint endPoint = GetLocalConnectionPointByID(END_CONNECTION_ID);
+
+            if (endPoint == null || !endPoint.isConnected)
+            {
+                GenerateSpecifiedEndcap(endEndcapPoint, END_ENDCAP_NAME);
+            }
         }
-}
+    }
 
     private void PopulateEndcapPoints()
     {
@@ -89,7 +150,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         endEndcapPoint.localUp = localUp;
     }
 
-    private void GenerateTrackAlongSpline() 
+    private void GenerateTrackAlongSpline()
     {
         float maxTrackLength = (float)RINGS_PER_TRACK * _settings.distanceBetweenRings;
         float splineLength = _splineContainer.Spline.GetLength();
@@ -101,7 +162,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         Vector3 localForward = Vector3.forward;
         Vector3 localUp = Vector3.up;
         float nextMaxPosAlongSpline = 0;
-
+        LocalPointData newPoint = new LocalPointData();
         // Generate all track segments
         for (int i = 1; i <= numTracks; i++)
         {
@@ -109,7 +170,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
             nextMaxPosAlongSpline += splineDistancePerTrack;
             if (i == numTracks) nextMaxPosAlongSpline = 1f;
             float distanceFromLastRing = 0;
-            LocalPointData newPoint = new LocalPointData();
+            newPoint = new LocalPointData();
             while (t <= nextMaxPosAlongSpline)
             {
                 // Get local values at t along spline
@@ -132,9 +193,10 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
                 Vector3 currPos = _splineContainer.EvaluatePosition(t);
                 distanceFromLastRing = Vector3.Distance(prevPos, currPos);
             }
-            GenerateConnectionPoint(newPoint, "End_Connection");
+            
             CreateTrackSegment(trackRingsData);
         }
+        GenerateConnectionPoint(newPoint, END_CONNECTION_ID);
     }
 
     private float GetNextPosAlongSpline(float t, float maxPosAlongSpline)
@@ -154,5 +216,49 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         if (t > maxPosAlongSpline) return maxPosAlongSpline;
 
         return t;
+    }
+
+    private void EnforceAutoTangents()
+    {
+        if (_splineContainer == null || _splineContainer.Spline == null) return;
+
+#if UNITY_EDITOR
+        if (_isEnforcingTangents) return;
+        _isEnforcingTangents = true;
+#endif
+
+        try
+        {
+            Spline spline = _splineContainer.Spline;
+
+            for (int i = 0; i < spline.Count; i++)
+            {
+                if (i == 0)
+                {
+                    spline.SetTangentMode(i, TangentMode.Broken);
+
+                    BezierKnot knot = spline[i];
+                    knot.Position = float3.zero;
+                    knot.Rotation = quaternion.identity;
+                    knot.TangentIn = float3.zero;
+                    knot.TangentOut = new float3(0f, 0f, 1f);
+                    spline.SetKnot(i, knot);
+                }
+                else
+                {
+                    spline.SetTangentMode(i, TangentMode.AutoSmooth);
+                }
+            }
+
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(_splineContainer);
+#endif
+        }
+        finally
+        {
+#if UNITY_EDITOR
+            _isEnforcingTangents = false;
+#endif
+        }
     }
 }
