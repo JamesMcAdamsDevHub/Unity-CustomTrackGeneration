@@ -26,7 +26,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
     [SerializeField, HideInInspector] public ConnectionPoint startConnection = null;
     protected const string START_CONNECTION_ID = "Start_Connection";
     private float _snapDistance = 100f;
-
+    
     protected virtual void Update()
     {
 #if UNITY_EDITOR

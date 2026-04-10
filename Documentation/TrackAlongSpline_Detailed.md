@@ -1,8 +1,18 @@
 # TrackAlongSpline Documentation
 
+
+### ⚠️ NOTE: 
+
+## THIS FILE IS NOT CURRENT
+
+For an up-to-date breakdown of design architecture and implementation, 
+please refer to:
+`Documentation/TrackGenerationArchitecture.md`
+
+## ANY DOCUMENTATION BELOW IS FROM AN EARLIER STATE OF DEVELOPMENT
+
 ### UML Diagram
-![Track Along Spline Generator (UML Diagram)](UML_Diagrams/TrackAlongSplineGenerator_UML.png)
-![Track Along Spline Generator (UML Diagram)](UML_Diagrams/TrackGenerationDataContainers_UML.png)
+![Track Along Spline Generator (UML Diagram)](Images/UML_Diagrams/TrackAlongSplineGenerator_UML.png)
 
 #### UML Key
 - **Blue**   -  Driver Class

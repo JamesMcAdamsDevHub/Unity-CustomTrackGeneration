@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: TrackGenerationDefaultConfig
   m_EditorClassIdentifier: Assembly-CSharp::TrackGenerationDefaultConfig
   TrackWidth: 100
-  TrackHeight: 3.58
-  RailWidth: 12.123442
+  TrackHeight: 5
+  RailWidth: 15
   RailRidgeHeight: 10
-  RailRidgePosition: 0
+  RailRidgePosition: 0.5
   DistanceBetweenRings: 20
   DeckMaterial: {fileID: 2100000, guid: 2a2d1a2017eb8fd4aba3ffbf3b40df7f, type: 2}
   DeckMaterialTileSize: 1
