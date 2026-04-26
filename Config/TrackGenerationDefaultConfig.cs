@@ -7,7 +7,8 @@ public class TrackGenerationDefaultConfig : ScriptableObject
     [Header("Track Constraints")]
     [Range(10f, 300f)] public float TrackWidth;
     [Range(0.1f, 10f)] public float TrackHeight;
-    [Range(1f, 20f)] public float RailWidth;
+    [Range(1f, 25f)] public float RailWidth;
+    public bool useSplitRidge;
     [Range(0f, 20f)] public float RailRidgeHeight;
     [Range(0f, 1f), Tooltip("Ridge Position [0,1]. 0 = Vertical Inner Ridge, 1 = Vertical Outer Edge")] public float RailRidgePosition;
     [Range(0.5f, 200f), Tooltip("Smaller Distance = Smoother Track")] public float DistanceBetweenRings;

@@ -34,6 +34,7 @@ public class TrackGenerationSettingsDrawer : PropertyDrawer
         EditorGUILayout.PropertyField(property.FindPropertyRelative("trackHeight"));
         EditorGUILayout.PropertyField(property.FindPropertyRelative("railWidth"));
         EditorGUILayout.PropertyField(property.FindPropertyRelative("railRidgeHeight"));
+        EditorGUILayout.PropertyField(property.FindPropertyRelative("useSplitRidge")); 
         EditorGUILayout.PropertyField(property.FindPropertyRelative("railRidgeOffset"));
         EditorGUILayout.PropertyField(property.FindPropertyRelative("distanceBetweenRings"));
         EditorGUILayout.PropertyField(property.FindPropertyRelative("deckMaterial"));

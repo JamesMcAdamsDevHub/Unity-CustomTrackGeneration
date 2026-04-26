@@ -12,8 +12,9 @@ public class TrackGenerationSettings
     [Range(0.1f, 10f)] public float trackHeight = 1f;
 
     [Header("Rail Dimensions")]
-    [Range(1f, 20f)] public float railWidth = 2f;
+    [Range(1f, 25f)] public float railWidth = 2f;
     [Range(0f, 20f)] public float railRidgeHeight = 1f;
+    public bool useSplitRidge = false;
     [Range(0f, 1f), Tooltip("Ridge Position [0,1]. 0 = Vertical inner edge, 1 = Vertical outer edge")]
     public float railRidgeOffset = 0.5f;
 
@@ -46,6 +47,7 @@ public class TrackGenerationSettings
         trackWidth = trackConfig.TrackWidth;
         trackHeight = trackConfig.TrackHeight;
         railWidth = trackConfig.RailWidth;
+        useSplitRidge = trackConfig.useSplitRidge;
         railRidgeHeight = trackConfig.RailRidgeHeight;
         railRidgeOffset = trackConfig.RailRidgePosition;
         distanceBetweenRings = trackConfig.DistanceBetweenRings;
@@ -70,7 +72,7 @@ public class TrackGenerationSettings
     {
         trackWidth = Mathf.Clamp(trackWidth, 50f, 300f);
         trackHeight = Mathf.Clamp(trackHeight, 0.1f, 10f);
-        railWidth = Mathf.Clamp(railWidth, 1f, 20f);
+        railWidth = Mathf.Clamp(railWidth, 1f, 25f);
         railRidgeHeight = Mathf.Clamp(railRidgeHeight, 0f, 20f);
         railRidgeOffset = Mathf.Clamp(railRidgeOffset, 0f, 1f);
         distanceBetweenRings = Mathf.Clamp(distanceBetweenRings, 0.5f, 200f);
@@ -84,6 +86,7 @@ public class TrackGenerationSettings
         data.TrackHeight = trackHeight;
         data.RailWidth = railWidth;
         data.RailRidgeHeight = railRidgeHeight;
+        data.useSplitRidge = useSplitRidge;
         data.RailRidgePosition = railRidgeOffset;
         data.DistanceBetweenRings = distanceBetweenRings;
         data.DeckMaterialTileSize = deckMaterialTileSize;

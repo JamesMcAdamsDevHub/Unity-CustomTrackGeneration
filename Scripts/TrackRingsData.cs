@@ -106,38 +106,55 @@ public class TrackRingsData
     private void AddRailVerts(TrackRingVectorData vectorData, Vector3 localPosition)
     {
         int idx = railMeshData.vertices.Count;
-        if (idx > 8)
+        int vertsPerRing = _trackConstraintsData.useSplitRidge ? 12 : 8;
+
+        if (idx > vertsPerRing)
         {
-            for (int i = 8; i > 0; i--)
+            for (int i = vertsPerRing; i > 0; i--)
             {
                 railMeshData.vertices.Add(railMeshData.vertices[idx - i]);
             }
         }
 
         // Left outer face
-        railMeshData.vertices.Add(localPosition - vectorData.RailRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+        railMeshData.vertices.Add(localPosition - vectorData.RailOuterRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
         railMeshData.vertices.Add(localPosition - vectorData.TrackWidthFromCenter + vectorData.TrackHeight);
 
         // Left inner face
         railMeshData.vertices.Add(localPosition - vectorData.RailWidthFromCenter + vectorData.TrackHeight);
-        railMeshData.vertices.Add(localPosition - vectorData.RailRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+        railMeshData.vertices.Add(localPosition - vectorData.RailInnerRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
 
         // Right outer face
         railMeshData.vertices.Add(localPosition + vectorData.TrackWidthFromCenter + vectorData.TrackHeight);
-        railMeshData.vertices.Add(localPosition + vectorData.RailRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+        railMeshData.vertices.Add(localPosition + vectorData.RailOuterRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
         
 
         // Right inner face
-        railMeshData.vertices.Add(localPosition + vectorData.RailRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+        railMeshData.vertices.Add(localPosition + vectorData.RailInnerRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
         railMeshData.vertices.Add(localPosition + vectorData.RailWidthFromCenter + vectorData.TrackHeight);
+
+        // If useSplitRidge = true, add verts to connect ridge points
+        if (_trackConstraintsData.useSplitRidge)
+        {
+            // Left top face
+            railMeshData.vertices.Add(localPosition - vectorData.RailInnerRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+            railMeshData.vertices.Add(localPosition - vectorData.RailOuterRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+
+            // Right top face
+            railMeshData.vertices.Add(localPosition + vectorData.RailInnerRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+            railMeshData.vertices.Add(localPosition + vectorData.RailOuterRidgeWidthFromCenter + vectorData.RailRidgeTotalHeight);
+        }
     }
 
     private void AddRailTriangles()
     {
-        if (railMeshData.vertices.Count == 8) return;
+        if (railMeshData.vertices.Count == 8 || (_trackConstraintsData.useSplitRidge && railMeshData.vertices.Count == 12))
+            return;
 
-        int startIdx = railMeshData.vertices.Count - 16;
-        int nextIdx = 8;
+        int vertsPerRing = _trackConstraintsData.useSplitRidge ? 12 : 8;
+
+        int startIdx = railMeshData.vertices.Count - (vertsPerRing * 2);
+        int nextIdx = vertsPerRing;
 
         // Left outer face
         railMeshData.triangles.Add(startIdx); railMeshData.triangles.Add(startIdx + nextIdx); railMeshData.triangles.Add(startIdx + 1);
@@ -148,17 +165,29 @@ public class TrackRingsData
         railMeshData.triangles.Add(startIdx + 2); railMeshData.triangles.Add(startIdx + 2 + nextIdx); railMeshData.triangles.Add(startIdx + 3);
 
         // Right inner face
+        railMeshData.triangles.Add(startIdx + 6); railMeshData.triangles.Add(startIdx + 6 + nextIdx); railMeshData.triangles.Add(startIdx + 7);
+        railMeshData.triangles.Add(startIdx + 7); railMeshData.triangles.Add(startIdx + 6 + nextIdx); railMeshData.triangles.Add(startIdx + 7 + nextIdx);
+
+        // Right outer face
         railMeshData.triangles.Add(startIdx + 4); railMeshData.triangles.Add(startIdx + 4 + nextIdx); railMeshData.triangles.Add(startIdx + 5);
         railMeshData.triangles.Add(startIdx + 5); railMeshData.triangles.Add(startIdx + 4 + nextIdx); railMeshData.triangles.Add(startIdx + 5 + nextIdx);
 
-        // Right outer face
-        railMeshData.triangles.Add(startIdx + 6); railMeshData.triangles.Add(startIdx + 6 + nextIdx); railMeshData.triangles.Add(startIdx + 7);
-        railMeshData.triangles.Add(startIdx + 7); railMeshData.triangles.Add(startIdx + 6 + nextIdx); railMeshData.triangles.Add(startIdx + 7 + nextIdx);
+        // If useSplitRidge = true, add triangles to connect ridge points
+        if (_trackConstraintsData.useSplitRidge)
+        {
+            // Top ridge face
+            railMeshData.triangles.Add(startIdx + 9 + nextIdx); railMeshData.triangles.Add(startIdx + 9); railMeshData.triangles.Add(startIdx + 8 + nextIdx);
+            railMeshData.triangles.Add(startIdx + 8); railMeshData.triangles.Add(startIdx + 8 + nextIdx); railMeshData.triangles.Add(startIdx + 9);
+
+            // Top ridge face
+            railMeshData.triangles.Add(startIdx + 10 + nextIdx); railMeshData.triangles.Add(startIdx + 10); railMeshData.triangles.Add(startIdx + 11 + nextIdx);
+            railMeshData.triangles.Add(startIdx + 11); railMeshData.triangles.Add(startIdx + 11 + nextIdx); railMeshData.triangles.Add(startIdx + 10);
+        }
     }
 
     private void AddRailUVs()
     {
-        if (railMeshData.vertices.Count == 8)
+        if (railMeshData.vertices.Count == 8 || (_trackConstraintsData.useSplitRidge && railMeshData.vertices.Count == 12))
             return;
 
         // Previous Vertices //
@@ -177,7 +206,17 @@ public class TrackRingsData
 
         // Right inner face
         railMeshData.uvs.Add(new Vector2(_previousRailU, 1f)); 
-        railMeshData.uvs.Add(new Vector2(_previousRailU, 0f)); 
+        railMeshData.uvs.Add(new Vector2(_previousRailU, 0f));
+
+        // If useSplitRidge = true, add UVs to connect ridge points
+        if (_trackConstraintsData.useSplitRidge)
+        {
+            railMeshData.uvs.Add(new Vector2(_previousRailU, 1f));
+            railMeshData.uvs.Add(new Vector2(_previousRailU, 0f));
+
+            railMeshData.uvs.Add(new Vector2(_previousRailU, 1f));
+            railMeshData.uvs.Add(new Vector2(_previousRailU, 0f));
+        }
 
         // Current Vertices //
 
@@ -196,6 +235,16 @@ public class TrackRingsData
         // Right inner face
         railMeshData.uvs.Add(new Vector2(_currentRailU, 1f));
         railMeshData.uvs.Add(new Vector2(_currentRailU, 0f));
+
+        // If useSplitRidge = true, add UVs to connect ridge points
+        if (_trackConstraintsData.useSplitRidge)
+        {
+            railMeshData.uvs.Add(new Vector2(_currentRailU, 1f));
+            railMeshData.uvs.Add(new Vector2(_currentRailU, 0f));
+
+            railMeshData.uvs.Add(new Vector2(_currentRailU, 1f));
+            railMeshData.uvs.Add(new Vector2(_currentRailU, 0f));
+        }
     }
 
     private void AddBaseVerts (TrackRingVectorData vectorData, Vector3 localPosition)
