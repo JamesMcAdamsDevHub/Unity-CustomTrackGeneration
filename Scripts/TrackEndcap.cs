@@ -19,9 +19,10 @@ public class TrackEndcap
         _railMeshData = railMeshData;
         _baseMeshData = baseMeshData;
     }
-
+     
     public GameObject Generate(Vector3 localPosition, Quaternion localRotation, string name)
     {
+
         GameObject endcapObject = new GameObject(name);
         endcapObject.transform.SetPositionAndRotation(localPosition, localRotation);
         endcapObject.transform.localScale = Vector3.one;
@@ -51,7 +52,7 @@ public class TrackEndcap
             railMeshCollider.sharedMesh = null;
             railMeshCollider.sharedMesh = railMesh;
         }
-
+        
         GameObject baseObject = new GameObject("Endcap_Base");
 #if UNITY_EDITOR
         Undo.RegisterCreatedObjectUndo(baseObject, "Create Base Component");
@@ -71,6 +72,7 @@ public class TrackEndcap
         baseMesh.RecalculateBounds();
         baseMeshFilter.sharedMesh = baseMesh;
 
+        
         if (_baseMeshData.vertices != null && _baseMeshData.triangles != null &&
             _baseMeshData.vertices.Count >= 3 && _baseMeshData.triangles.Count >= 3)
         {

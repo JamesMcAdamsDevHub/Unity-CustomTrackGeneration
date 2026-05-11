@@ -1,6 +1,8 @@
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
+using Unity.VisualScripting;
+
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -44,6 +46,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         {
             return;
         }
+
         DestroySpecifiedEndcap(targetEndcapName);
     }
 
@@ -59,16 +62,6 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
             GenerateSpecifiedEndcap(endEndcapPoint, END_ENDCAP_NAME);
     }
 #if UNITY_EDITOR
-    private void OnEnable()
-    {
-        Spline.Changed += OnSplineChanged;
-    }
-
-    private void OnDisable()
-    {
-        Spline.Changed -= OnSplineChanged;
-    }
-
     private void OnSplineChanged(Spline spline, int knotIndex, SplineModification modification)
     {
         if (_splineContainer == null) return;

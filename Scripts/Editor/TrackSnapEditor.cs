@@ -1,7 +1,5 @@
 #if UNITY_EDITOR
-using Unity.VisualScripting;
 using UnityEditor;
-using UnityEditor.Build.Content;
 using UnityEngine;
 
 [InitializeOnLoad]
@@ -10,12 +8,12 @@ public static class TrackSnapEditor
     private static bool _isDragging;
     private static bool _mouseHeld;
     private static TrackGenerationOrchestrator _track;
-
+    
     static TrackSnapEditor()
     {
         SceneView.duringSceneGui += OnSceneGUI;
     }
-
+    
     private static void OnSceneGUI(SceneView sceneView)
     {
         Event e = Event.current;
@@ -32,8 +30,9 @@ public static class TrackSnapEditor
         }
 
         Transform selected = Selection.activeTransform;
-        if (selected != null) _track = selected.GetComponent<TrackGenerationOrchestrator>();
 
+        if (selected != null) _track = selected.GetComponent<TrackGenerationOrchestrator>();
+       
         if (_track == null)
         {
             _track = null;

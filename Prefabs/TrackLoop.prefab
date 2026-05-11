@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6169291680248181849}
   - component: {fileID: 3250833807339458434}
+  - component: {fileID: 4318023997083817491}
   m_Layer: 0
   m_Name: TrackLoop
   m_TagString: Untagged
@@ -48,11 +49,12 @@ MonoBehaviour:
     useConfig: 1
     trackConfig: {fileID: 11400000, guid: bdfae3361580e32489cb5f388288c410, type: 2}
     trackWidth: 100
-    trackHeight: 3.58
-    railWidth: 12.123442
+    trackHeight: 5
+    railWidth: 15
     railRidgeHeight: 10
-    railRidgeOffset: 0
-    distanceBetweenRings: 50
+    useSplitRidge: 0
+    railRidgeOffset: 0.5
+    distanceBetweenRings: 20
     deckMaterial: {fileID: 2100000, guid: 2a2d1a2017eb8fd4aba3ffbf3b40df7f, type: 2}
     deckMaterialTileSize: 1
     railMaterial: {fileID: 2100000, guid: 6e04036147caec142af2db63eed77810, type: 2}
@@ -60,8 +62,21 @@ MonoBehaviour:
     baseMaterial: {fileID: 2100000, guid: 9838e17712bbcf54ba439b0517ec08fd, type: 2}
     baseMaterialTileSize: 1
   startConnection: {fileID: 0}
-  _radius: 232
+  _radius: 150
   _loopPercentage: 1
   _loopGap: 0.1
-  _embankment: 0.5
+  _embankment: 0.25
   _loopsRight: 1
+--- !u!114 &4318023997083817491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1729064180926400582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 333aa075990242f41abbb9f378c5be70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DestroyRootOnPrefabClose
+  rootName: Loop_Root
