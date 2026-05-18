@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Splines;
 
 [InitializeOnLoad]
 public static class TrackSnapEditor
@@ -31,8 +32,10 @@ public static class TrackSnapEditor
 
         Transform selected = Selection.activeTransform;
 
+
         if (selected != null) _track = selected.GetComponent<TrackGenerationOrchestrator>();
        
+        
         if (_track == null)
         {
             _track = null;
@@ -52,8 +55,17 @@ public static class TrackSnapEditor
         }
         else if (!_mouseHeld && _isDragging)
         {
+            _track.hasBeenPlacedInScene = true;
             _track.TrySnap();
             _isDragging = false;
+
+            if (_track is TrackAlongSplineGenerator)
+            {
+                ((TrackAlongSplineGenerator)_track).hasConnectedLastSplineKnot = false;
+                ((TrackAlongSplineGenerator)_track).TryLastSplineKnotSnap();
+                _track.ConnectAdjoiningPoints();
+            }  
+
         }
     }
 }

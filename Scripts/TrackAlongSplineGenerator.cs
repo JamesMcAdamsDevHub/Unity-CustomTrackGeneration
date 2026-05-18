@@ -1,7 +1,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
-using Unity.VisualScripting;
+using UnityEngine.Playables;
 
 
 #if UNITY_EDITOR
@@ -25,6 +25,8 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
 
     private const string END_CONNECTION_ID = "End_Connection";
     protected override string ROOT_NAME => "Spline_Track_Root";
+
+    public bool hasConnectedLastSplineKnot;
 
 #if UNITY_EDITOR
     private bool _isEnforcingTangents;
@@ -61,12 +63,29 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         else if (ID == END_CONNECTION_ID && _generateEndEndcap)
             GenerateSpecifiedEndcap(endEndcapPoint, END_ENDCAP_NAME);
     }
+
 #if UNITY_EDITOR
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+
+        Spline.Changed -= OnSplineChanged;
+        Spline.Changed += OnSplineChanged;
+
+        EnforceAutoTangents();
+    }
+
+    protected virtual void OnDisable()
+    {
+        Spline.Changed -= OnSplineChanged;
+    }
+#endif
+
+#if UNITY_EDITOR 
     private void OnSplineChanged(Spline spline, int knotIndex, SplineModification modification)
     {
         if (_splineContainer == null) return;
         if (spline != _splineContainer.Spline) return;
-        if (_isEnforcingTangents) return;
 
         EnforceAutoTangents();
     }
@@ -79,6 +98,9 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
             Debug.LogWarning("Could not generate track: SplineContainer not assigned.", this);
             return;
         }
+
+        TryLastSplineKnotSnap();
+        EnforceAutoTangents();
         GenerateTrackAlongSpline();
         GenerateEndcaps();
     }
@@ -89,6 +111,8 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
 
         Transform root = GetRoot();
         if (root == null) return;
+
+        if (startEndcapPoint.isEqual(endEndcapPoint)) return;
 
         if (_generateStartEndcap && root.Find(START_ENDCAP_NAME) == null)
         {
@@ -104,7 +128,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         {
             ConnectionPoint endPoint = GetLocalConnectionPointByID(END_CONNECTION_ID);
 
-            if (endPoint == null || !endPoint.isConnected)
+            if ((endPoint == null || !endPoint.isConnected))
             {
                 GenerateSpecifiedEndcap(endEndcapPoint, END_ENDCAP_NAME);
             }
@@ -219,6 +243,9 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         if (_isEnforcingTangents) return;
         _isEnforcingTangents = true;
 #endif
+        ConnectionPoint endPoint = GetLocalConnectionPointByID(END_CONNECTION_ID);
+
+        bool endConnected = endPoint != null && endPoint.isConnected;
 
         try
         {
@@ -239,7 +266,10 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
                 }
                 else
                 {
-                    spline.SetTangentMode(i, TangentMode.AutoSmooth);
+                    if (hasConnectedLastSplineKnot && i == spline.Count - 1)
+                        spline.SetTangentMode(i, TangentMode.Broken);
+                    else
+                        spline.SetTangentMode(i, TangentMode.AutoSmooth);
                 }
             }
 
@@ -253,5 +283,60 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
             _isEnforcingTangents = false;
 #endif
         }
+    }
+
+    private void SnapLastKnotToNearbyConnectionPoint()
+    {
+        if (_splineContainer == null || _splineContainer.Spline == null) return;
+
+        if (!hasBeenPlacedInScene) return;
+
+        Spline spline = _splineContainer.Spline;
+        if (spline.Count == 0) return;
+
+        int lastIndex = spline.Count - 1;
+
+        Vector3 lastWorldPos =
+            _splineContainer.transform.TransformPoint((Vector3)spline[lastIndex].Position);
+
+        ConnectionPoint closest =
+            GetClosestConnectionPointInRange(lastWorldPos, SNAP_DISTANCE);
+
+        if (closest == null) return;
+
+        BezierKnot knot = spline[lastIndex];
+
+        Transform splineTransform = _splineContainer.transform;
+
+        Vector3 localPos = splineTransform.InverseTransformPoint(closest.transform.position);
+
+        Vector3 targetForward = closest.transform.forward;
+
+        if (closest.ID != START_CONNECTION_ID)
+            targetForward *= -1;
+
+        Quaternion targetWorldRot = Quaternion.LookRotation(targetForward,closest.transform.up);
+
+        Quaternion localRot =
+            Quaternion.Inverse(splineTransform.rotation) *
+            targetWorldRot;
+
+        spline.SetTangentMode(lastIndex, TangentMode.Broken);
+
+        knot.Position = localPos;
+        knot.Rotation = localRot;
+
+        spline.SetKnot(lastIndex, knot);
+
+        hasConnectedLastSplineKnot = true;
+
+#if UNITY_EDITOR
+        EditorUtility.SetDirty(_splineContainer);
+#endif
+    }
+
+    public void TryLastSplineKnotSnap()
+    {
+        SnapLastKnotToNearbyConnectionPoint();
     }
 }

@@ -24,9 +24,11 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
 
     [SerializeField, HideInInspector] public ConnectionPoint startConnection = null;
     protected const string START_CONNECTION_ID = "Start_Connection";
-    private float _snapDistance = 100f;
+    protected const float SNAP_DISTANCE = 100f;
 
     private static bool _isLoadingConnections = false;
+
+    public bool hasBeenPlacedInScene;
 
     protected virtual void Update()
     {
@@ -62,6 +64,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         DisconnectTracks();
         ConnectAdjoiningPoints();
         _isLoadingConnections = false;
+
     }
 
     public void GenerateTrack()
@@ -228,7 +231,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         
         DisconnectTracks();
 
-        ConnectionPoint closestPoint = GetClosestConnectionPointInRange(startConnection, _snapDistance);
+        ConnectionPoint closestPoint = GetClosestConnectionPointInRange(startConnection, SNAP_DISTANCE);
 
         if (closestPoint == null) return;
         
@@ -283,14 +286,19 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
             other.connectedPoint = null;
             other.isConnected = false;
 
-            if (otherTrack != null)
+#if UNITY_EDITOR
+            if (!Undo.isProcessing)
             {
-                otherTrack.ConnectionDettachedUpdate(otherID);
+                if (otherTrack != null)
+                {
+                    otherTrack.ConnectionDettachedUpdate(otherID);
+                }
             }
         }
+#endif
     }
 
-    public ConnectionPoint GetClosestConnectionPointInRange(ConnectionPoint self, float maxDistance)
+    protected ConnectionPoint GetClosestConnectionPointInRange(ConnectionPoint self, float maxDistance)
     {
         Transform root = GetRoot();
         if (root == null) return null;
@@ -315,6 +323,36 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
             return null;
         return closestPoint;
     }
+    
+    protected ConnectionPoint GetClosestConnectionPointInRange(Vector3 worldPosition, float maxDistance)
+    {
+        Transform root = GetRoot();
+
+        ConnectionPoint[] points =
+            Object.FindObjectsByType<ConnectionPoint>(FindObjectsSortMode.None);
+
+        ConnectionPoint closest = null;
+        float closestDistance = SNAP_DISTANCE;
+
+        foreach (ConnectionPoint point in points)
+        {
+            if (point == null) continue;
+            if (point.isConnected) continue;
+
+            if (root != null && point.parentObject == root && point.ID != START_CONNECTION_ID)
+                continue;
+
+            float distance = Vector3.Distance(worldPosition, point.transform.position);
+
+            if (distance <= closestDistance)
+            {
+                closestDistance = distance;
+                closest = point;
+            }
+        }
+
+        return closest;
+    }
 
     public void ConnectAdjoiningPoints()
     {
@@ -325,7 +363,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         {
             if (point.isConnected) continue;
             
-            ConnectionPoint pointInRange = GetClosestConnectionPointInRange(point, 0.5f);
+            ConnectionPoint pointInRange = GetClosestConnectionPointInRange(point, 0.05f);
             
             if (pointInRange == null || pointInRange.isConnected) continue;
             point.ConnectPoint(pointInRange);

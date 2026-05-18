@@ -47,24 +47,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TrackLoopGenerator
   _settings:
     useConfig: 1
-    trackConfig: {fileID: 11400000, guid: bdfae3361580e32489cb5f388288c410, type: 2}
-    trackWidth: 100
+    trackConfig: {fileID: 11400000, guid: c1c1a704147044444b0f24deb4aa7a4a, type: 2}
+    trackWidth: 150
     trackHeight: 5
     railWidth: 15
-    railRidgeHeight: 10
+    railRidgeHeight: 5
     useSplitRidge: 0
     railRidgeOffset: 0.5
-    distanceBetweenRings: 20
-    deckMaterial: {fileID: 2100000, guid: 2a2d1a2017eb8fd4aba3ffbf3b40df7f, type: 2}
+    distanceBetweenRings: 0.5
+    deckMaterial: {fileID: 2100000, guid: 74daf7b39edec57489e8f53b3420d71c, type: 2}
     deckMaterialTileSize: 1
-    railMaterial: {fileID: 2100000, guid: 6e04036147caec142af2db63eed77810, type: 2}
+    railMaterial: {fileID: 2100000, guid: a8034fbb5d5c16549b046bf82c5ae008, type: 2}
     railMaterialTileSize: 1
     baseMaterial: {fileID: 2100000, guid: 9838e17712bbcf54ba439b0517ec08fd, type: 2}
     baseMaterialTileSize: 1
   startConnection: {fileID: 0}
+  hasBeenPlacedInScene: 0
   _radius: 150
   _loopPercentage: 1
-  _loopGap: 0.1
+  _loopGap: 5
   _embankment: 0.25
   _loopsRight: 1
 --- !u!114 &4318023997083817491

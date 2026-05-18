@@ -17,4 +17,9 @@ public class LocalPointData
         this.localForward = localForward;
         this.localUp = localUp;
     }
+
+    public bool isEqual(LocalPointData other)
+    {
+        return (Vector3.Distance(localPosition, other.localPosition) < 0.001f);
+    }
 }
