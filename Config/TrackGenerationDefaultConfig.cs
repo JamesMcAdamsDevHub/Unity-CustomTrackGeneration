@@ -26,7 +26,7 @@ public class TrackGenerationDefaultConfig : ScriptableObject
     {
         EditorApplication.delayCall += () =>
         {
-            foreach (var generator in Object.FindObjectsByType<TrackGenerationOrchestrator>(FindObjectsSortMode.None))
+            foreach (var generator in FindObjectsByType<TrackGenerationOrchestrator>())
             {
                 if (generator == null) continue;
 

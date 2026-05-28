@@ -64,9 +64,8 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         DisconnectTracks();
         ConnectAdjoiningPoints();
         _isLoadingConnections = false;
-
     }
-
+    
     public void GenerateTrack()
     {
         if (_settings == null) return;
@@ -304,7 +303,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         if (root == null) return null;
         if (self == null) return null;
         float shortestDistance = maxDistance + 1;
-        ConnectionPoint[] points = Object.FindObjectsByType<ConnectionPoint>(FindObjectsSortMode.None);
+        ConnectionPoint[] points = FindObjectsByType<ConnectionPoint>();
         ConnectionPoint closestPoint = null;
         foreach (ConnectionPoint point in points)
         {
@@ -328,8 +327,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
     {
         Transform root = GetRoot();
 
-        ConnectionPoint[] points =
-            Object.FindObjectsByType<ConnectionPoint>(FindObjectsSortMode.None);
+        ConnectionPoint[] points = FindObjectsByType<ConnectionPoint>();
 
         ConnectionPoint closest = null;
         float closestDistance = SNAP_DISTANCE;

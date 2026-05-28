@@ -264,13 +264,10 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
                     knot.TangentOut = new float3(0f, 0f, 1f);
                     spline.SetKnot(i, knot);
                 }
+                else if (hasConnectedLastSplineKnot && i == spline.Count - 1)
+                    spline.SetTangentMode(i, TangentMode.Broken);
                 else
-                {
-                    if (hasConnectedLastSplineKnot && i == spline.Count - 1)
-                        spline.SetTangentMode(i, TangentMode.Broken);
-                    else
-                        spline.SetTangentMode(i, TangentMode.AutoSmooth);
-                }
+                    spline.SetTangentMode(i, TangentMode.AutoSmooth);
             }
 
 #if UNITY_EDITOR

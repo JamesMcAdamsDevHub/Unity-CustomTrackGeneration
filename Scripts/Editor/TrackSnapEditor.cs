@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.Splines;
 using UnityEngine;
 using UnityEngine.Splines;
 
@@ -61,12 +62,29 @@ public static class TrackSnapEditor
 
             if (_track is TrackAlongSplineGenerator)
             {
-                ((TrackAlongSplineGenerator)_track).hasConnectedLastSplineKnot = false;
-                ((TrackAlongSplineGenerator)_track).TryLastSplineKnotSnap();
+                TrackAlongSplineGenerator splineTrack = (TrackAlongSplineGenerator)_track;
+                if (IsSelectedKnotLastInContainer(splineTrack))
+                    splineTrack.hasConnectedLastSplineKnot = false;
+                splineTrack.TryLastSplineKnotSnap();
                 _track.ConnectAdjoiningPoints();
             }  
 
         }
+    }
+    private static bool IsSelectedKnotLastInContainer(TrackAlongSplineGenerator track)
+    {
+        SplineContainer container = track.GetComponent<SplineContainer>();
+        if (container == null || container.Splines.Count == 0)
+            return false;
+
+        Spline spline = container.Splines[0];
+        if (spline.Count == 0)
+            return false;
+
+        SplineInfo splineInfo = new SplineInfo(container, 0);
+        ISelectableElement activeElement = SplineSelection.GetActiveElement(new[] { splineInfo });
+
+        return activeElement != null && activeElement.KnotIndex == spline.Count - 1;
     }
 }
 #endif
