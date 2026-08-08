@@ -8,15 +8,15 @@ public class TrackLoopGenerator : TrackGenerationOrchestrator
 {
     [Header("Loop Dimensions")]
 
-    [SerializeField, Range(50f, 300f),
+    [SerializeField, Range(5f, 30f),
         Tooltip("Radius of the generated loop.")] 
-    private float _radius = 50f;
+    private float _radius = 5f;
 
     [SerializeField, Range(0.2f, 1f), 
         Tooltip("Normalized percentage of a full loop to generate.")] 
     private float _loopPercentage = 1f;
 
-    [SerializeField, Range(0f, 500f), 
+    [SerializeField, Range(0f, 50f), 
         Tooltip("Separation between the rising and falling sides of the loop. A value of 0 creates a circular loop. " +
         "Values above 0 offset the loop to avoid self-overlap.")] 
     private float _loopGap = 0.1f;

@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17adc42a7e4fcef4484a482d1f426930, type: 3}
   m_Name: racetrack4WayIntersectionConfig
   m_EditorClassIdentifier: Assembly-CSharp::TrackGenerationDefaultConfig
-  TrackWidth: 150
-  TrackHeight: 5
-  RailWidth: 15
+  TrackWidth: 5
+  TrackHeight: 0.01
+  RailWidth: 0.5
   useSplitRidge: 0
-  RailRidgeHeight: 5
+  RailRidgeHeight: 0.1
   RailRidgePosition: 0.5
-  DistanceBetweenRings: 0.5
+  DistanceBetweenRings: 0.05
   DeckMaterial: {fileID: 2100000, guid: 3ac6c1257917ab84f95cd745cf91c744, type: 2}
   DeckMaterialTileSize: 1
   RailMaterial: {fileID: 2100000, guid: a8034fbb5d5c16549b046bf82c5ae008, type: 2}

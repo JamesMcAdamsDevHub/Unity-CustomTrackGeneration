@@ -8,19 +8,19 @@ public class TrackGenerationSettings
     public TrackGenerationDefaultConfig trackConfig;
 
     [Header("Track Dimensions")]
-    [Range(50f, 300f)] public float trackWidth = 100f;
-    [Range(0.1f, 10f)] public float trackHeight = 1f;
+    [Range(1f, 30f)] public float trackWidth = 10f;
+    [Range(0.01f, 10f)] public float trackHeight = 0.5f;
 
     [Header("Rail Dimensions")]
-    [Range(1f, 25f)] public float railWidth = 2f;
-    [Range(0f, 20f)] public float railRidgeHeight = 1f;
+    [Range(0.1f, 2.5f)] public float railWidth = 1.5f;
+    [Range(0f, 2f)] public float railRidgeHeight = 1f;
     public bool useSplitRidge = false;
     [Range(0f, 1f), Tooltip("Ridge Position [0,1]. 0 = Vertical inner edge, 1 = Vertical outer edge")]
     public float railRidgeOffset = 0.5f;
 
     [Header("Mesh Resolution")]
-    [Range(0.5f, 200f), Tooltip("Distance between generated rings of vertices. Smaller values produce smoother geometry but increase vertex count.")]
-    public float distanceBetweenRings = 5f;
+    [Range(0.05f, 20f), Tooltip("Distance between generated rings of vertices. Smaller values produce smoother geometry but increase vertex count.")]
+    public float distanceBetweenRings = 2f;
 
     [Header("Materials")]
     public Material deckMaterial;
@@ -70,12 +70,12 @@ public class TrackGenerationSettings
 
     public void EnforceConstraints()
     {
-        trackWidth = Mathf.Clamp(trackWidth, 50f, 300f);
-        trackHeight = Mathf.Clamp(trackHeight, 0.1f, 10f);
-        railWidth = Mathf.Clamp(railWidth, 1f, 25f);
-        railRidgeHeight = Mathf.Clamp(railRidgeHeight, 0f, 20f);
+        trackWidth = Mathf.Clamp(trackWidth, 1f, 30f);
+        trackHeight = Mathf.Clamp(trackHeight, 0.01f, 10f);
+        railWidth = Mathf.Clamp(railWidth, 0.1f, 2.5f);
+        railRidgeHeight = Mathf.Clamp(railRidgeHeight, 0f, 2f);
         railRidgeOffset = Mathf.Clamp(railRidgeOffset, 0f, 1f);
-        distanceBetweenRings = Mathf.Clamp(distanceBetweenRings, 0.5f, 200f);
+        distanceBetweenRings = Mathf.Clamp(distanceBetweenRings, 0.05f, 20f);
         deckMaterialTileSize = Mathf.Clamp(deckMaterialTileSize, 0.01f, 5f);
         railMaterialTileSize = Mathf.Clamp(railMaterialTileSize, 0.01f, 5f);
         baseMaterialTileSize = Mathf.Clamp(baseMaterialTileSize, 0.01f, 5f);

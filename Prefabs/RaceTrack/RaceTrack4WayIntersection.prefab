@@ -48,13 +48,13 @@ MonoBehaviour:
   _settings:
     useConfig: 1
     trackConfig: {fileID: 11400000, guid: f00e448c858b7c44fb27a2e61f535bc8, type: 2}
-    trackWidth: 150
-    trackHeight: 5
-    railWidth: 15
-    railRidgeHeight: 5
+    trackWidth: 5
+    trackHeight: 0.01
+    railWidth: 0.5
+    railRidgeHeight: 0.5
     useSplitRidge: 0
     railRidgeOffset: 0.5
-    distanceBetweenRings: 0.5
+    distanceBetweenRings: 0.05
     deckMaterial: {fileID: 2100000, guid: 3ac6c1257917ab84f95cd745cf91c744, type: 2}
     deckMaterialTileSize: 1
     railMaterial: {fileID: 2100000, guid: a8034fbb5d5c16549b046bf82c5ae008, type: 2}

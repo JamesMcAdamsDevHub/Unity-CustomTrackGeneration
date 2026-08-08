@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17adc42a7e4fcef4484a482d1f426930, type: 3}
   m_Name: street4WayIntersectionConfig
   m_EditorClassIdentifier: Assembly-CSharp::TrackGenerationDefaultConfig
-  TrackWidth: 175
-  TrackHeight: 5
-  RailWidth: 25
+  TrackWidth: 5
+  TrackHeight: 0.05
+  RailWidth: 0.5
   useSplitRidge: 1
-  RailRidgeHeight: 2
+  RailRidgeHeight: 0.1
   RailRidgePosition: 1
-  DistanceBetweenRings: 20
-  DeckMaterial: {fileID: 2100000, guid: 3ac6c1257917ab84f95cd745cf91c744, type: 2}
+  DistanceBetweenRings: 2
+  DeckMaterial: {fileID: 2100000, guid: 97e539ff309349a43ad76565659cb22a, type: 2}
   DeckMaterialTileSize: 1
   RailMaterial: {fileID: 2100000, guid: d909b6cfcca6259408899f16844e7de2, type: 2}
   RailMaterialTileSize: 1

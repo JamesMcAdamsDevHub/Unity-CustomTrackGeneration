@@ -1,8 +1,11 @@
-using System.Drawing;
 using UnityEngine;
 
 public class TrackRingsData
 {
+    private const float DECK_WORLD_UNITS_PER_TILE = 6f;
+    private const float RAIL_WORLD_UNITS_PER_TILE = 0.6f;
+    private const float BASE_WORLD_UNITS_PER_TILE = 2f;
+
     private TrackConstraintsData _trackConstraintsData;
     public MeshData deckMeshData = new MeshData();
     public MeshData railMeshData = new MeshData();
@@ -47,9 +50,9 @@ public class TrackRingsData
 
     private void updateCurrentU()
     {
-        _currentDeckV = _trackConstraintsData.DeckMaterialTileSize * _distanceAlongTrack / 40f;
-        _currentRailU = _trackConstraintsData.RailMaterialTileSize * _distanceAlongTrack / 20f;
-        _currentBaseU = _trackConstraintsData.BaseMaterialTileSize * _distanceAlongTrack / 20f;
+        _currentDeckV = _trackConstraintsData.DeckMaterialTileSize * _distanceAlongTrack / DECK_WORLD_UNITS_PER_TILE;
+        _currentRailU = _trackConstraintsData.RailMaterialTileSize * _distanceAlongTrack / RAIL_WORLD_UNITS_PER_TILE;
+        _currentBaseU = _trackConstraintsData.BaseMaterialTileSize * _distanceAlongTrack / BASE_WORLD_UNITS_PER_TILE;
     }
 
     private void updatePreviousU()

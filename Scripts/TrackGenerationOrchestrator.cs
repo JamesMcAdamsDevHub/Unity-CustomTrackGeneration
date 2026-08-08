@@ -24,7 +24,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
 
     [SerializeField, HideInInspector] public ConnectionPoint startConnection = null;
     protected const string START_CONNECTION_ID = "Start_Connection";
-    protected const float SNAP_DISTANCE = 100f;
+    protected const float SNAP_DISTANCE = 5f;
 
     private static bool _isLoadingConnections = false;
 
@@ -330,7 +330,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         ConnectionPoint[] points = FindObjectsByType<ConnectionPoint>();
 
         ConnectionPoint closest = null;
-        float closestDistance = SNAP_DISTANCE;
+        float closestDistance = maxDistance;
 
         foreach (ConnectionPoint point in points)
         {
