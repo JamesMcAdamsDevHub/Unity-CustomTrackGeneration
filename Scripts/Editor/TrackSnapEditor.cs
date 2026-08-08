@@ -69,6 +69,7 @@ public static class TrackSnapEditor
                 _track.ConnectAdjoiningPoints();
             }  
 
+            Track4WayIntersectionGenerator.DisconnectStaleConnectionsForAllIntersections();
         }
     }
     private static bool IsSelectedKnotLastInContainer(TrackAlongSplineGenerator track)

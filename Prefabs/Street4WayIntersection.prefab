@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3219594482882957626
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9095983684340580267}
+  - component: {fileID: 4417496301144608233}
+  - component: {fileID: 4112241337163846149}
+  m_Layer: 0
+  m_Name: Street4WayIntersection
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9095983684340580267
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3219594482882957626}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2121.9875, y: 536, z: 442.73868}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4417496301144608233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3219594482882957626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 178157a212e5a8248a7bbd577b024f04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Track4WayIntersectionGenerator
+  _settings:
+    useConfig: 1
+    trackConfig: {fileID: 11400000, guid: 6278e53fa112f054e8f3b176809273cc, type: 2}
+    trackWidth: 175
+    trackHeight: 5
+    railWidth: 25
+    railRidgeHeight: 2
+    useSplitRidge: 1
+    railRidgeOffset: 1
+    distanceBetweenRings: 20
+    deckMaterial: {fileID: 2100000, guid: 3ac6c1257917ab84f95cd745cf91c744, type: 2}
+    deckMaterialTileSize: 1
+    railMaterial: {fileID: 2100000, guid: d909b6cfcca6259408899f16844e7de2, type: 2}
+    railMaterialTileSize: 1
+    baseMaterial: {fileID: 2100000, guid: 9838e17712bbcf54ba439b0517ec08fd, type: 2}
+    baseMaterialTileSize: 1
+  startConnection: {fileID: 0}
+  hasBeenPlacedInScene: 1
+--- !u!114 &4112241337163846149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3219594482882957626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 333aa075990242f41abbb9f378c5be70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DestroyRootOnPrefabClose
+  rootName: 4_Way_Intersection_Root

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 1522625204504032535}
   - component: {fileID: 2007933183635820658}
   m_Layer: 0
-  m_Name: TrackAlongSpline
+  m_Name: RaceTrackAlongSpline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
