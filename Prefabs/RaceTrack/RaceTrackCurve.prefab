@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1729064180926400582
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6169291680248181849}
+  - component: {fileID: -8185033223204367656}
+  - component: {fileID: 4318023997083817491}
+  m_Layer: 0
+  m_Name: RaceTrackCurve
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6169291680248181849
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1729064180926400582}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-8185033223204367656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1729064180926400582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ef1bfa13caf757448480f3cb7869e58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TrackCurveGenerator
+  _settings:
+    useConfig: 1
+    trackConfig: {fileID: 11400000, guid: c1c1a704147044444b0f24deb4aa7a4a, type: 2}
+    trackWidth: 5
+    trackHeight: 0.01
+    railWidth: 0.5
+    railRidgeHeight: 0.1
+    useSplitRidge: 0
+    railRidgeOffset: 0.5
+    distanceBetweenRings: 0.05
+    deckMaterial: {fileID: 2100000, guid: 74daf7b39edec57489e8f53b3420d71c, type: 2}
+    deckMaterialTileSize: 1
+    railMaterial: {fileID: 2100000, guid: a8034fbb5d5c16549b046bf82c5ae008, type: 2}
+    railMaterialTileSize: 1
+    baseMaterial: {fileID: 2100000, guid: 9838e17712bbcf54ba439b0517ec08fd, type: 2}
+    baseMaterialTileSize: 1
+  startConnection: {fileID: 0}
+  hasBeenPlacedInScene: 0
+  _radius: 5
+  _curvePercentage: 1
+  _embankment: 0.5
+  _loopsRight: 1
+--- !u!114 &4318023997083817491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1729064180926400582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 333aa075990242f41abbb9f378c5be70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DestroyRootOnPrefabClose
+  rootName: Curve_Root

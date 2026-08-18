@@ -16,7 +16,7 @@ MonoBehaviour:
   TrackHeight: 0.01
   RailWidth: 0.5
   useSplitRidge: 0
-  RailRidgeHeight: 0.5
+  RailRidgeHeight: 0.1
   RailRidgePosition: 0.5
   DistanceBetweenRings: 0.05
   DeckMaterial: {fileID: 2100000, guid: 74daf7b39edec57489e8f53b3420d71c, type: 2}
