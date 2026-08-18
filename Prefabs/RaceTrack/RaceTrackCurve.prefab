@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6169291680248181849}
-  - component: {fileID: -8185033223204367656}
   - component: {fileID: 4318023997083817491}
+  - component: {fileID: 5511202949024312579}
   m_Layer: 0
   m_Name: RaceTrackCurve
   m_TagString: Untagged
@@ -33,7 +33,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-8185033223204367656
+--- !u!114 &4318023997083817491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1729064180926400582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 333aa075990242f41abbb9f378c5be70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DestroyRootOnPrefabClose
+  rootName: Curve_Root
+--- !u!114 &5511202949024312579
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -63,20 +76,9 @@ MonoBehaviour:
     baseMaterialTileSize: 1
   startConnection: {fileID: 0}
   hasBeenPlacedInScene: 0
-  _radius: 5
-  _curvePercentage: 1
-  _embankment: 0.5
-  _loopsRight: 1
---- !u!114 &4318023997083817491
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1729064180926400582}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 333aa075990242f41abbb9f378c5be70, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DestroyRootOnPrefabClose
-  rootName: Curve_Root
+  _curveRadius: 20
+  _arcAngle: 90
+  _curvesRight: 1
+  _elevationOffset: 0
+  _maxBankDegrees: 0
+  _returnBankToFlat: 1
