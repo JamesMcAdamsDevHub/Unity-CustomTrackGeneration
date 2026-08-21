@@ -4,8 +4,9 @@ using UnityEngine;
 using UnityEditor;
 #endif
 
-public class Track4WayIntersection
+public class TrackIntersection
 {
+    private string _namePrefix;
     private Material _deckMaterial;
     private Material _railMaterial;
     private Material _baseMaterial;
@@ -13,9 +14,10 @@ public class Track4WayIntersection
     private MeshData _railMeshData;
     private MeshData _baseMeshData;
 
-    public Track4WayIntersection(Material deckMaterial, Material railMaterial, Material baseMaterial, 
+    public TrackIntersection(string namePrefix, Material deckMaterial, Material railMaterial, Material baseMaterial,
         MeshData deckMeshData, MeshData railMeshData, MeshData baseMeshData)
     {
+        _namePrefix = namePrefix;
         _deckMaterial = deckMaterial;
         _railMaterial = railMaterial;
         _baseMaterial = baseMaterial;
@@ -31,7 +33,7 @@ public class Track4WayIntersection
         trackIntersectionObject.transform.localScale = Vector3.one;
 
         GameObject deckObject;
-        deckObject = new GameObject("Track_4_Way_Intersection_Deck");
+        deckObject = new GameObject(_namePrefix + "_Deck");
 #if UNITY_EDITOR
         Undo.RegisterCreatedObjectUndo(deckObject, "Create Deck Component");
 #endif
@@ -42,7 +44,7 @@ public class Track4WayIntersection
         deckMeshRenderer.sharedMaterial = _deckMaterial;
 
         Mesh deckMesh = new Mesh();
-        deckMesh.name = "Track_4_Way_Intersection_Deck_Mesh";
+        deckMesh.name = _namePrefix + "_Deck_Mesh";
         deckMeshFilter.sharedMesh = deckMesh;
         deckMesh.SetVertices(_deckMeshData.vertices);
         deckMesh.SetTriangles(_deckMeshData.triangles, 0);
@@ -52,7 +54,7 @@ public class Track4WayIntersection
         deckMeshCollider.sharedMesh = deckMesh;
 
         GameObject railObject;
-        railObject = new GameObject("Track_4_Way_Intersection_Rail");
+        railObject = new GameObject(_namePrefix + "_Rail");
 #if UNITY_EDITOR
         Undo.RegisterCreatedObjectUndo(railObject, "Create Rail Component");
 #endif
@@ -63,7 +65,7 @@ public class Track4WayIntersection
         railMeshRenderer.sharedMaterial = _railMaterial;
 
         Mesh railMesh = new Mesh();
-        railMesh.name = "Track_4_Way_Intersection_Rail_Mesh";
+        railMesh.name = _namePrefix + "_Rail_Mesh";
         railMeshFilter.sharedMesh = railMesh;
         railMesh.SetVertices(_railMeshData.vertices);
         railMesh.SetTriangles(_railMeshData.triangles, 0);
@@ -73,7 +75,7 @@ public class Track4WayIntersection
         railMeshCollider.sharedMesh = railMesh;
 
         GameObject baseObject;
-        baseObject = new GameObject("Track_4_Way_Intersection_Base");
+        baseObject = new GameObject(_namePrefix + "_Base");
 #if UNITY_EDITOR
         Undo.RegisterCreatedObjectUndo(baseObject, "Create Base Component");
 #endif
@@ -84,7 +86,7 @@ public class Track4WayIntersection
         baseMeshRenderer.sharedMaterial = _baseMaterial;
 
         Mesh baseMesh = new Mesh();
-        baseMesh.name = "Track_Segment_Base_Mesh";
+        baseMesh.name = _namePrefix + "_Base_Mesh";
         baseMeshFilter.sharedMesh = baseMesh;
         baseMesh.SetVertices(_baseMeshData.vertices);
         baseMesh.SetTriangles(_baseMeshData.triangles, 0);

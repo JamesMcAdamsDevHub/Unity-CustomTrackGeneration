@@ -11,7 +11,7 @@ public class TrackGenerationDefaultConfig : ScriptableObject
     public bool useSplitRidge;
     [Range(0f, 2f)] public float RailRidgeHeight;
     [Range(0f, 1f), Tooltip("Ridge Position [0,1]. 0 = Vertical Inner Ridge, 1 = Vertical Outer Edge")] public float RailRidgePosition;
-    [Range(0.05f, 20f), Tooltip("Smaller Distance = Smoother Track")] public float DistanceBetweenRings;
+    [HideInInspector] public float DistanceBetweenRings = 2f;
 
     [Header("Track Materials")]
     public Material DeckMaterial;

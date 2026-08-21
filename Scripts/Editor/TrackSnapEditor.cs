@@ -57,21 +57,47 @@ public static class TrackSnapEditor
         else if (!_mouseHeld && _isDragging)
         {
             _track.hasBeenPlacedInScene = true;
-            _track.TrySnap();
+            TrackGenerationOrchestrator[] detachedTracks = _track.TrySnap();
             _isDragging = false;
 
-            if (_track is TrackAlongSplineGenerator)
+            TrackAlongSplineGenerator splineTrack = _track as TrackAlongSplineGenerator;
+            if (splineTrack != null)
             {
-                TrackAlongSplineGenerator splineTrack = (TrackAlongSplineGenerator)_track;
                 if (IsSelectedKnotLastInContainer(splineTrack))
                     splineTrack.hasConnectedLastSplineKnot = false;
                 splineTrack.TryLastSplineKnotSnap();
                 _track.ConnectAdjoiningPoints();
             }  
 
-            Track4WayIntersectionGenerator.DisconnectStaleConnectionsForAllIntersections();
+            RepairConnections(_track, detachedTracks);
+
+            if (splineTrack != null)
+                splineTrack.RefreshEndcaps();
         }
     }
+
+    private static void RepairConnections(
+        TrackGenerationOrchestrator movedTrack,
+        TrackGenerationOrchestrator[] detachedTracks)
+    {
+        RepairConnections(movedTrack);
+
+        if (detachedTracks == null) return;
+
+        foreach (TrackGenerationOrchestrator track in detachedTracks)
+        {
+            RepairConnections(track);
+        }
+    }
+
+    private static void RepairConnections(TrackGenerationOrchestrator track)
+    {
+        if (track == null) return;
+
+        track.DisconnectStaleConnections();
+        track.ConnectAdjoiningPoints();
+    }
+
     private static bool IsSelectedKnotLastInContainer(TrackAlongSplineGenerator track)
     {
         SplineContainer container = track.GetComponent<SplineContainer>();

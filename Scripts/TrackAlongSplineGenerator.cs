@@ -1,8 +1,6 @@
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Splines;
-using UnityEngine.Playables;
-
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -23,10 +21,9 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
     private const string START_ENDCAP_NAME = "Start_Endcap";
     private const string END_ENDCAP_NAME = "End_Endcap";
 
-    private const string END_CONNECTION_ID = "End_Connection";
     protected override string ROOT_NAME => "Spline_Track_Root";
 
-    public bool hasConnectedLastSplineKnot;
+    [HideInInspector] public bool hasConnectedLastSplineKnot;
 
 #if UNITY_EDITOR
     private bool _isEnforcingTangents;
@@ -52,7 +49,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         DestroySpecifiedEndcap(targetEndcapName);
     }
 
-    public override void ConnectionDettachedUpdate(string ID)
+    public override void ConnectionDetachedUpdate(string ID)
     {
         if (!_generateStartEndcap && !_generateEndEndcap) return;
 
@@ -105,6 +102,11 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         GenerateEndcaps();
     }
 
+    public void RefreshEndcaps()
+    {
+        GenerateEndcaps();
+    }
+
     private void GenerateEndcaps()
     {
         PopulateEndcapPoints();
@@ -114,25 +116,26 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
 
         if (startEndcapPoint.isEqual(endEndcapPoint)) return;
 
-        if (_generateStartEndcap && root.Find(START_ENDCAP_NAME) == null)
-        {
-            ConnectionPoint startPoint = GetLocalConnectionPointByID(START_CONNECTION_ID);
+        SyncEndcap(START_CONNECTION_ID, START_ENDCAP_NAME, startEndcapPoint, _generateStartEndcap);
+        SyncEndcap(END_CONNECTION_ID, END_ENDCAP_NAME, endEndcapPoint, _generateEndEndcap);
+    }
 
-            if (startPoint == null || !startPoint.isConnected)
-            {
-                GenerateSpecifiedEndcap(startEndcapPoint, START_ENDCAP_NAME);
-            }
+    private void SyncEndcap(string connectionID, string endcapName, LocalPointData endcapPoint, bool shouldGenerateEndcap)
+    {
+        Transform root = GetRoot();
+        if (root == null) return;
+
+        ConnectionPoint connectionPoint = GetLocalConnectionPointByID(connectionID);
+        bool isConnected = connectionPoint != null && connectionPoint.isConnected;
+
+        if (isConnected || !shouldGenerateEndcap)
+        {
+            DestroySpecifiedEndcap(endcapName);
+            return;
         }
 
-        if (_generateEndEndcap && root.Find(END_ENDCAP_NAME) == null)
-        {
-            ConnectionPoint endPoint = GetLocalConnectionPointByID(END_CONNECTION_ID);
-
-            if ((endPoint == null || !endPoint.isConnected))
-            {
-                GenerateSpecifiedEndcap(endEndcapPoint, END_ENDCAP_NAME);
-            }
-        }
+        if (root.Find(endcapName) == null)
+            GenerateSpecifiedEndcap(endcapPoint, endcapName);
     }
 
     private void PopulateEndcapPoints()
@@ -243,10 +246,6 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         if (_isEnforcingTangents) return;
         _isEnforcingTangents = true;
 #endif
-        ConnectionPoint endPoint = GetLocalConnectionPointByID(END_CONNECTION_ID);
-
-        bool endConnected = endPoint != null && endPoint.isConnected;
-
         try
         {
             Spline spline = _splineContainer.Spline;
@@ -312,7 +311,7 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         if (closest.ID != START_CONNECTION_ID)
             targetForward *= -1;
 
-        Quaternion targetWorldRot = Quaternion.LookRotation(targetForward,closest.transform.up);
+        Quaternion targetWorldRot = Quaternion.LookRotation(targetForward, closest.transform.up);
 
         Quaternion localRot =
             Quaternion.Inverse(splineTransform.rotation) *

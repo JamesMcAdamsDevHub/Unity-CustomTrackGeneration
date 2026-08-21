@@ -2,11 +2,21 @@ using UnityEngine;
 
 public class ConnectionPoint : MonoBehaviour
 {
+    [HideInInspector]
     public Transform parentObject = null;
+
+    [HideInInspector]
     public ConnectionPoint connectedPoint = null;
+
+    [HideInInspector]
     public Transform worldTransform = null;
+
+    [HideInInspector]
     public bool isConnected = false;
+
+    [HideInInspector]
     public string ID = "";
+
     public void Initialize(Transform parentObject, Transform worldTransform, string name)
     {
         this.parentObject = parentObject;
@@ -58,22 +68,38 @@ public class ConnectionPoint : MonoBehaviour
 
     public void DisconnectPoint(ConnectionPoint other)
     {
-        if (parentObject == null || other.parentObject == null) return;
+        if (other == null) return;
 
-        TrackGenerationOrchestrator track1 =
-            parentObject.GetComponentInParent<TrackGenerationOrchestrator>();
+        bool isReciprocalConnection = connectedPoint == other && other.connectedPoint == this;
+        if (!isReciprocalConnection)
+        {
+            if (connectedPoint == other)
+                connectedPoint = null;
 
-        TrackGenerationOrchestrator track2 =
-            other.parentObject.GetComponentInParent<TrackGenerationOrchestrator>();
+            isConnected = connectedPoint != null;
 
-        if (track1 == null || track2 == null) return;
+            return;
+        }
 
-        track1.ConnectionDettachedUpdate(ID);
-        track2.ConnectionDettachedUpdate(other.ID);
+        TrackGenerationOrchestrator track1 = parentObject == null
+            ? null
+            : parentObject.GetComponentInParent<TrackGenerationOrchestrator>();
+
+        TrackGenerationOrchestrator track2 = other.parentObject == null
+            ? null
+            : other.parentObject.GetComponentInParent<TrackGenerationOrchestrator>();
+
+        string track1ConnectionID = ID;
+        string track2ConnectionID = other.ID;
 
         other.isConnected = false;
         isConnected = false;
         other.connectedPoint = null;
         connectedPoint = null;
+
+        if (track1 == null || track2 == null) return;
+
+        track1.ConnectionDetachedUpdate(track1ConnectionID);
+        track2.ConnectionDetachedUpdate(track2ConnectionID);
     }
 }

@@ -18,8 +18,6 @@ public class TrackGenerationSettings
     [Range(0f, 1f), Tooltip("Ridge Position [0,1]. 0 = Vertical inner edge, 1 = Vertical outer edge")]
     public float railRidgeOffset = 0.5f;
 
-    [Header("Mesh Resolution")]
-    [Range(0.05f, 20f), Tooltip("Distance between generated rings of vertices. Smaller values produce smoother geometry but increase vertex count.")]
     public float distanceBetweenRings = 2f;
 
     [Header("Materials")]

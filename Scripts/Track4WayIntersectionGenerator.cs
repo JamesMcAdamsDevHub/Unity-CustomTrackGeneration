@@ -11,7 +11,6 @@ public class Track4WayIntersectionGenerator : TrackGenerationOrchestrator
     private const string NORTH_CONNECTION_ID = "North_Connection";
     private const string EAST_CONNECTION_ID = "East_Connection";
     private const string WEST_CONNECTION_ID = "West_Connection";
-    private const float STALE_CONNECTION_DISTANCE = 0.05f;
 
     protected override string ROOT_NAME => "4_Way_Intersection_Root";
 
@@ -24,7 +23,12 @@ public class Track4WayIntersectionGenerator : TrackGenerationOrchestrator
         RefreshIntersectionGeometry();
     }
 
-    public override void ConnectionDettachedUpdate(string ID)
+    public override void ConnectionDetachedUpdate(string ID)
+    {
+        RefreshIntersectionGeometry();
+    }
+
+    protected override void StaleConnectionDetachedUpdate()
     {
         RefreshIntersectionGeometry();
     }
@@ -120,8 +124,15 @@ public class Track4WayIntersectionGenerator : TrackGenerationOrchestrator
             IsConnectionOpen(WEST_CONNECTION_ID)
         );
 
-        Track4WayIntersection intersection = new
-            Track4WayIntersection(_settings.deckMaterial, _settings.railMaterial, _settings.baseMaterial, intersectionData.deckMeshData, intersectionData.railMeshData, intersectionData.baseMeshData);
+        TrackIntersection intersection = new TrackIntersection(
+            "Track_4_Way_Intersection",
+            _settings.deckMaterial,
+            _settings.railMaterial,
+            _settings.baseMaterial,
+            intersectionData.deckMeshData,
+            intersectionData.railMeshData,
+            intersectionData.baseMeshData
+        );
 
         GameObject intersectionGO = intersection.Generate();
 
@@ -142,42 +153,4 @@ public class Track4WayIntersectionGenerator : TrackGenerationOrchestrator
         return point != null && point.isConnected;
     }
 
-#if UNITY_EDITOR
-    public static void DisconnectStaleConnectionsForAllIntersections()
-    {
-        Track4WayIntersectionGenerator[] intersections = FindObjectsByType<Track4WayIntersectionGenerator>();
-
-        foreach (Track4WayIntersectionGenerator intersection in intersections)
-        {
-            if (intersection == null) continue;
-            intersection.DisconnectStaleIntersectionConnections();
-            intersection.RefreshIntersectionGeometry();
-        }
-    }
-
-    private void DisconnectStaleIntersectionConnections()
-    {
-        Transform root = GetRoot();
-        if (root == null) return;
-
-        ConnectionPoint[] points = root.GetComponentsInChildren<ConnectionPoint>(true);
-
-        foreach (ConnectionPoint point in points)
-        {
-            if (point == null || !point.isConnected) continue;
-
-            ConnectionPoint other = point.connectedPoint;
-            if (other == null)
-            {
-                point.isConnected = false;
-                continue;
-            }
-
-            float distance = Vector3.Distance(point.transform.position, other.transform.position);
-            if (distance <= STALE_CONNECTION_DISTANCE) continue;
-
-            point.DisconnectPoint(other);
-        }
-    }
-#endif
 }

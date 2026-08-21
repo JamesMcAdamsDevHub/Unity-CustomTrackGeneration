@@ -1,9 +1,5 @@
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 public class TrackLoopGenerator : TrackGenerationOrchestrator
 {
     [Header("Loop Dimensions")]
@@ -58,7 +54,7 @@ public class TrackLoopGenerator : TrackGenerationOrchestrator
 
             distanceFromLastPosition = Vector3.Distance(currentPoint.localPosition, nextPosition);
         }
-        GenerateConnectionPoint(currentPoint, "End_Connection");
+        GenerateConnectionPoint(currentPoint, END_CONNECTION_ID);
         trackRingsData.GenerateRingAtPoint(currentPoint, distanceFromLastPosition);
         CreateTrackSegment(trackRingsData);
     }

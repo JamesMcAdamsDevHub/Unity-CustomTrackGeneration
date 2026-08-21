@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor.SceneManagement;
 
 #if UNITY_EDITOR
 using UnityEditor;
+using UnityEditor.SceneManagement;
 #endif
 
 [ExecuteAlways]
@@ -15,20 +16,23 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
     protected const int MAX_VERTS_PER_TRACK = 6000;
     protected const int VERTS_PER_RING = 20;
     protected const int RINGS_PER_TRACK = MAX_VERTS_PER_TRACK / VERTS_PER_RING;
+    private const float STALE_CONNECTION_DISTANCE = 0.05f;
 
     protected abstract string ROOT_NAME { get; }
     protected abstract void GenerateNewTrack();
 
     public virtual void ConnectionAttachedUpdate(string ID) { } // Optional functionality
-    public virtual void ConnectionDettachedUpdate(string ID) { } // Optional functionality
+    public virtual void ConnectionDetachedUpdate(string ID) { } // Optional functionality
+    protected virtual void StaleConnectionDetachedUpdate() { } // Optional functionality
 
     [SerializeField, HideInInspector] public ConnectionPoint startConnection = null;
     protected const string START_CONNECTION_ID = "Start_Connection";
+    protected const string END_CONNECTION_ID = "End_Connection";
     protected const float SNAP_DISTANCE = 5f;
 
     private static bool _isLoadingConnections = false;
 
-    public bool hasBeenPlacedInScene;
+    [HideInInspector] public bool hasBeenPlacedInScene;
 
     protected virtual void Update()
     {
@@ -176,7 +180,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         ConnectionPoint[] points =
         GetComponentsInChildren<ConnectionPoint>();
 
-        foreach(ConnectionPoint point in points)
+        foreach (ConnectionPoint point in points)
         {
             if (point.ID == START_CONNECTION_ID)
             {
@@ -225,14 +229,18 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         }
     }
 
-    public void TrySnap()
+    public TrackGenerationOrchestrator[] TrySnap()
     {
-        
-        DisconnectTracks();
+        TrackGenerationOrchestrator[] detachedTracks = DisconnectTracks();
+
+        if (startConnection == null || startConnection.worldTransform == null)
+            return detachedTracks;
 
         ConnectionPoint closestPoint = GetClosestConnectionPointInRange(startConnection, SNAP_DISTANCE);
 
-        if (closestPoint == null) return;
+        if (closestPoint == null) return detachedTracks;
+        if (closestPoint.parentObject == null || closestPoint.worldTransform == null)
+            return detachedTracks;
         
         TrackGenerationOrchestrator connectionParent =
             closestPoint.parentObject.GetComponentInParent<TrackGenerationOrchestrator>();
@@ -263,6 +271,7 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         transform.position += deltaPosition;
         
         ConnectAdjoiningPoints();
+        return detachedTracks;
     }
 
     private void OnDestroy()
@@ -275,26 +284,22 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
             if (point.connectedPoint == null) continue;
 
             ConnectionPoint other = point.connectedPoint;
-
-            TrackGenerationOrchestrator otherTrack = null;
-            if (other.parentObject != null)
-                otherTrack = other.parentObject.GetComponentInParent<TrackGenerationOrchestrator>();
-
-            string otherID = other.ID;
-
-            other.connectedPoint = null;
-            other.isConnected = false;
+            bool isReciprocalConnection = other.connectedPoint == point;
 
 #if UNITY_EDITOR
             if (!Undo.isProcessing)
             {
-                if (otherTrack != null)
-                {
-                    otherTrack.ConnectionDettachedUpdate(otherID);
-                }
+                point.DisconnectPoint(other);
             }
-        }
+            else if (isReciprocalConnection)
+            {
+                other.connectedPoint = null;
+                other.isConnected = false;
+            }
+#else
+            point.DisconnectPoint(other);
 #endif
+        }
     }
 
     protected ConnectionPoint GetClosestConnectionPointInRange(ConnectionPoint self, float maxDistance)
@@ -307,12 +312,15 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         ConnectionPoint closestPoint = null;
         foreach (ConnectionPoint point in points)
         {
+            if (point == null) continue;
             if (point.parentObject == root) continue;
 
             if (point.isConnected) continue;
+            if (point.worldTransform == null)
+                point.worldTransform = point.transform;
 
-            float distance = Vector3.Distance(self.transform.position, point.transform.position);
-            if (distance < shortestDistance)
+            float distance = Vector3.Distance(self.worldTransform.position, point.worldTransform.position);
+            if (distance < shortestDistance || (Mathf.Approximately(distance, shortestDistance) && IsEarlierConnectionPoint(point, closestPoint)))
             {
                 shortestDistance = distance;
                 closestPoint = point;
@@ -336,13 +344,15 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         {
             if (point == null) continue;
             if (point.isConnected) continue;
+            if (point.worldTransform == null)
+                point.worldTransform = point.transform;
 
             if (root != null && point.parentObject == root && point.ID != START_CONNECTION_ID)
                 continue;
 
-            float distance = Vector3.Distance(worldPosition, point.transform.position);
+            float distance = Vector3.Distance(worldPosition, point.worldTransform.position);
 
-            if (distance <= closestDistance)
+            if (distance < closestDistance || (Mathf.Approximately(distance, closestDistance) && IsEarlierConnectionPoint(point, closest)))
             {
                 closestDistance = distance;
                 closest = point;
@@ -350,6 +360,30 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         }
 
         return closest;
+    }
+
+    private bool IsEarlierConnectionPoint(ConnectionPoint candidate, ConnectionPoint current)
+    {
+        if (candidate == null) return false;
+        if (current == null) return true;
+
+        return string.CompareOrdinal(GetHierarchyPath(candidate.transform), GetHierarchyPath(current.transform)) < 0;
+    }
+
+    private string GetHierarchyPath(Transform target)
+    {
+        if (target == null) return string.Empty;
+
+        string path = target.name;
+        Transform parent = target.parent;
+
+        while (parent != null)
+        {
+            path = parent.name + "/" + path;
+            parent = parent.parent;
+        }
+
+        return path;
     }
 
     public void ConnectAdjoiningPoints()
@@ -368,19 +402,74 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         }
     }
 
-    public void DisconnectTracks()
+    public TrackGenerationOrchestrator[] DisconnectTracks()
     {
+        List<TrackGenerationOrchestrator> detachedTracks = new List<TrackGenerationOrchestrator>();
         ConnectionPoint[] points =
         GetComponentsInChildren<ConnectionPoint>();
-        if (points == null) return;
+        if (points == null) return detachedTracks.ToArray();
         foreach (ConnectionPoint point in points)
         {
             ConnectionPoint other = point.connectedPoint;
 
             if (other == null || !point.isConnected) continue;
 
+            bool isReciprocalConnection = other.connectedPoint == point;
+            TrackGenerationOrchestrator otherTrack = null;
+            if (isReciprocalConnection && other.parentObject != null)
+                otherTrack = other.parentObject.GetComponentInParent<TrackGenerationOrchestrator>();
+
             point.DisconnectPoint(other);
+
+            if (otherTrack != null && otherTrack != this && !detachedTracks.Contains(otherTrack))
+                detachedTracks.Add(otherTrack);
         }
+
+        return detachedTracks.ToArray();
+    }
+
+    public virtual bool DisconnectStaleConnections()
+    {
+        Transform root = GetRoot();
+        if (root == null) return false;
+
+        bool disconnectedAny = false;
+        bool detachedOrphanedConnection = false;
+        ConnectionPoint[] points = root.GetComponentsInChildren<ConnectionPoint>(true);
+
+        foreach (ConnectionPoint point in points)
+        {
+            if (point == null || !point.isConnected) continue;
+
+            ConnectionPoint other = point.connectedPoint;
+            if (other == null)
+            {
+                point.isConnected = false;
+                disconnectedAny = true;
+                detachedOrphanedConnection = true;
+                continue;
+            }
+
+            if (other.connectedPoint != point)
+            {
+                point.connectedPoint = null;
+                point.isConnected = false;
+                disconnectedAny = true;
+                detachedOrphanedConnection = true;
+                continue;
+            }
+
+            float distance = Vector3.Distance(point.transform.position, other.transform.position);
+            if (distance <= STALE_CONNECTION_DISTANCE) continue;
+
+            point.DisconnectPoint(other);
+            disconnectedAny = true;
+        }
+
+        if (detachedOrphanedConnection)
+            StaleConnectionDetachedUpdate();
+
+        return disconnectedAny;
     }
 
     protected ConnectionPoint GetLocalConnectionPointByID(string ID)

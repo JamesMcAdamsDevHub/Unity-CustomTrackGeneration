@@ -61,8 +61,8 @@ MonoBehaviour:
   _settings:
     useConfig: 1
     trackConfig: {fileID: 11400000, guid: c1c1a704147044444b0f24deb4aa7a4a, type: 2}
-    trackWidth: 5
-    trackHeight: 0.01
+    trackWidth: 10
+    trackHeight: 0.05
     railWidth: 0.5
     railRidgeHeight: 0.1
     useSplitRidge: 0
@@ -80,5 +80,6 @@ MonoBehaviour:
   _arcAngle: 90
   _curvesRight: 1
   _elevationOffset: 0
+  _useConstantRadius: 0
   _maxBankDegrees: 0
   _returnBankToFlat: 1

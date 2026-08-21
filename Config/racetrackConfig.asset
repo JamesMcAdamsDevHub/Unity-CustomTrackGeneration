@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: racetrackConfig
   m_EditorClassIdentifier: Assembly-CSharp::TrackGenerationDefaultConfig
   TrackWidth: 10
-  TrackHeight: 0.01
-  RailWidth: 0.5
+  TrackHeight: 0.05
+  RailWidth: 0.75
   useSplitRidge: 0
-  RailRidgeHeight: 0.1
+  RailRidgeHeight: 0.2
   RailRidgePosition: 0.5
   DistanceBetweenRings: 0.05
   DeckMaterial: {fileID: 2100000, guid: 74daf7b39edec57489e8f53b3420d71c, type: 2}

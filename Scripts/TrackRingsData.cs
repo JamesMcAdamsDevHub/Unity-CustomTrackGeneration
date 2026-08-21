@@ -31,7 +31,7 @@ public class TrackRingsData
 
         _distanceAlongTrack += distanceFromLastRing;
         
-        updateCurrentU();
+        UpdateCurrentU();
 
         AddDeckVerts(vectorData, point.localPosition);
         AddDeckTriangles();
@@ -45,17 +45,17 @@ public class TrackRingsData
         AddBaseTriangles();
         AddBaseUVs();
 
-        updatePreviousU();
+        UpdatePreviousU();
     }
 
-    private void updateCurrentU()
+    private void UpdateCurrentU()
     {
         _currentDeckV = _trackConstraintsData.DeckMaterialTileSize * _distanceAlongTrack / DECK_WORLD_UNITS_PER_TILE;
         _currentRailU = _trackConstraintsData.RailMaterialTileSize * _distanceAlongTrack / RAIL_WORLD_UNITS_PER_TILE;
         _currentBaseU = _trackConstraintsData.BaseMaterialTileSize * _distanceAlongTrack / BASE_WORLD_UNITS_PER_TILE;
     }
 
-    private void updatePreviousU()
+    private void UpdatePreviousU()
     {
         _previousDeckV = _currentDeckV;
         _previousRailU = _currentRailU;
