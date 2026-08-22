@@ -136,6 +136,8 @@ public abstract class TrackGenerationOrchestrator : MonoBehaviour
         GameObject endcapGO = endcap.Generate(point.localPosition, localRotation, name);
         Undo.RegisterCreatedObjectUndo(endcapGO, "Create Endcap");
         Undo.SetTransformParent(endcapGO.transform, root, "Attach endcap to root");
+        endcapGO.transform.localPosition = point.localPosition;
+        endcapGO.transform.localRotation = localRotation;
         endcapGO.transform.localScale = Vector3.one;
 #endif
     }

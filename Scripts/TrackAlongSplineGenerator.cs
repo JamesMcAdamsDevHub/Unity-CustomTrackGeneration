@@ -146,6 +146,9 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
             return;
         }
 
+        if (TryPopulateEndcapPointsFromConnections())
+            return;
+
         float3 posTemp, tanTemp, upTemp;
         Vector3 localPosition, localForward, localUp;
 
@@ -168,6 +171,31 @@ public class TrackAlongSplineGenerator : TrackGenerationOrchestrator
         endEndcapPoint.localPosition = localPosition;
         endEndcapPoint.localForward = localForward;
         endEndcapPoint.localUp = localUp;
+    }
+
+    private bool TryPopulateEndcapPointsFromConnections()
+    {
+        ConnectionPoint startConnectionPoint = GetLocalConnectionPointByID(START_CONNECTION_ID);
+        ConnectionPoint endConnectionPoint = GetLocalConnectionPointByID(END_CONNECTION_ID);
+
+        if (startConnectionPoint == null || endConnectionPoint == null)
+            return false;
+
+        PopulateEndcapPointFromConnection(startConnectionPoint, startEndcapPoint, false);
+        PopulateEndcapPointFromConnection(endConnectionPoint, endEndcapPoint, true);
+
+        return true;
+    }
+
+    private void PopulateEndcapPointFromConnection(ConnectionPoint connectionPoint, LocalPointData endcapPoint, bool reverseForward)
+    {
+        Transform connectionTransform = connectionPoint.transform;
+
+        endcapPoint.localPosition = connectionTransform.localPosition;
+        Vector3 connectionForward = connectionTransform.localRotation * Vector3.forward;
+
+        endcapPoint.localForward = (reverseForward ? -connectionForward : connectionForward).normalized;
+        endcapPoint.localUp = (connectionTransform.localRotation * Vector3.up).normalized;
     }
 
     private void GenerateTrackAlongSpline()
